@@ -1,0 +1,120 @@
+/* src/index.css */
+
+/* Reset básico para todos elementos */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Fonte e cores padrão */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
+  color: #333;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* Links */
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Cabeçalhos */
+h1, h2, h3, h4 {
+  color: #222;
+  margin-bottom: 1rem;
+}
+
+/* Inputs, selects, buttons */
+input, select, button, textarea {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline-offset: 2px;
+  transition: border-color 0.3s ease;
+}
+
+input:focus, select:focus, button:focus, textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Botões */
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Containers */
+.container {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Listas */
+ul {
+  list-style: none;
+}
+
+/* Flex helpers */
+.flex {
+  display: flex;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-center {
+  align-items: center;
+}
+
+/* Espaçamentos */
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+/* Sombra suave */
+.shadow {
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+}
+
+/* Fundo branco com borda arredondada */
+.card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
