@@ -1,0 +1,188 @@
+/* Layout Principal */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f6fa;
+  position: relative;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background: #fff;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+}
+
+.menu a {
+  text-decoration: none;
+  color: #007bff;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.menu a svg {
+  margin-right: 8px;
+}
+
+/* Logout */
+.logout {
+  padding: 20px; /* maior padding para ocupar espaço */
+  border-top: 1px solid #ddd;
+}
+
+.logout button {
+  width: 100%;
+  background: #dc3545; /* vermelho para diferenciar */
+  color: #fff;
+  border: none;
+  padding: 12px 0; /* altura maior */
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
+
+.logout button svg {
+  margin-right: 8px;
+}
+
+.logout button:hover {
+  background: #c82333;
+}
+
+/* Conteúdo */
+.content {
+  flex: 1;
+  padding: 30px 20px;
+}
+
+.cards {
+  display: flex;
+  gap: 20px;
+  margin: 30px 0;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  flex: 1;
+  min-width: 220px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.card h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+/* Tabela */
+.table-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+/* Footer */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  padding: 10px 20px;
+  font-size: 14px;
+  background: #f5f6fa;
+  color: #333;
+}
+
+/* Direitos Reservados */
+.footer-reserved {
+  position: fixed;
+  bottom: 0;
+  left: 20px;
+  font-size: 12px;
+  color: #555;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    transform: translateX(-100%);
+    z-index: 1000;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .cards {
+    flex-direction: column;
+  }
+
+  .footer {
+    text-align: center;
+    width: 100%;
+  }
+
+  .footer-reserved {
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+}

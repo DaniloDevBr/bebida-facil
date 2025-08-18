@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { db } from '../services/firebase';
 import { collection, query, where, getDocs, Timestamp, Query } from 'firebase/firestore';
 import {
@@ -28,6 +29,7 @@ interface ProdutoVendaResumo {
 }
 
 const Relatorios = () => {
+  const navigate = useNavigate();
   const [vendas, setVendas] = useState<Venda[]>([]);
   const [dataInicio, setDataInicio] = useState<string>('');
   const [dataFim, setDataFim] = useState<string>('');
@@ -57,7 +59,6 @@ const Relatorios = () => {
       const querySnapshot = await getDocs(q);
       const vendasLista: Venda[] = [];
       querySnapshot.forEach(docSnap => {
-        // Aqui espalhe primeiro os dados, depois sobrescreva o id
         vendasLista.push({ ...(docSnap.data() as Venda), id: docSnap.id });
       });
       setVendas(vendasLista);
@@ -99,11 +100,10 @@ const Relatorios = () => {
     setResumoPorProduto(Array.from(resumoMap.values()));
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchVendas();
   }, []);
 
-  // Função para exportar CSV
   const exportarCSV = () => {
     if (vendas.length === 0) {
       alert('Não há dados para exportar.');
@@ -119,7 +119,9 @@ const Relatorios = () => {
     ]);
     const csvContent =
       'data:text/csv;charset=utf-8,' +
-      [header, ...rows].map(e => e.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
+      [header, ...rows]
+        .map(e => e.map(cell => `"${cell.replace(/"/g, '""')}"`).join(','))
+        .join('\n');
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
@@ -133,106 +135,146 @@ const Relatorios = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Relatórios de Vendas</h2>
+    <div className="p-6 max-w-5xl mx-auto bg-white rounded-lg shadow-md">
+      <h2 className="text-3xl font-bold mb-4 text-indigo-700">Relatórios de Vendas</h2>
 
-      <section className="mb-6">
-        <h3 className="font-semibold mb-2">Filtrar por data</h3>
-        <div className="flex gap-4">
-          <label>
-            Início:{' '}
+      {/* Botão de voltar ao menu inicial */}
+      <button
+        onClick={() => navigate('/')}
+        className="mb-6 px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold transition"
+      >
+        ← Voltar ao Menu Inicial
+      </button>
+
+      {/* Seção de filtro por datas */}
+      <section className="mb-8">
+        <h3 className="font-semibold text-lg mb-3">Filtrar por data</h3>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+          <label className="flex flex-col text-gray-700">
+            Início:
             <input
               type="date"
               value={dataInicio}
               onChange={(e) => setDataInicio(e.target.value)}
-              className="border p-1 rounded"
+              className="border rounded-md p-2 mt-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
             />
           </label>
-          <label>
-            Fim:{' '}
+          <label className="flex flex-col text-gray-700">
+            Fim:
             <input
               type="date"
               value={dataFim}
               onChange={(e) => setDataFim(e.target.value)}
-              className="border p-1 rounded"
+              className="border rounded-md p-2 mt-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
             />
           </label>
           <button
             onClick={fetchVendas}
-            className="bg-blue-600 text-white px-4 py-1 rounded"
             disabled={loading}
+            className={`px-5 py-2 rounded-md font-semibold text-white transition ${
+              loading ? 'bg-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+            }`}
           >
             {loading ? 'Carregando...' : 'Filtrar'}
           </button>
           <button
             onClick={exportarCSV}
-            className="bg-green-600 text-white px-4 py-1 rounded"
             disabled={loading || vendas.length === 0}
+            className={`px-5 py-2 rounded-md font-semibold text-white transition ${
+              loading || vendas.length === 0
+                ? 'bg-green-300 cursor-not-allowed'
+                : 'bg-green-600 hover:bg-green-700'
+            }`}
           >
             Exportar CSV
           </button>
         </div>
       </section>
 
-      <section className="mb-6">
-        <h3 className="font-semibold mb-2">Totais Gerais</h3>
-        <p>
+      {/* Totais gerais */}
+      <section className="mb-8 bg-indigo-50 rounded-md p-4 shadow-inner">
+        <h3 className="font-semibold text-lg mb-3">Totais Gerais</h3>
+        <p className="text-gray-700">
           Quantidade total vendida: <strong>{totalQuantidade}</strong>
         </p>
-        <p>
+        <p className="text-gray-700">
           Receita total estimada: <strong>R$ {totalReceita.toFixed(2)}</strong>
         </p>
       </section>
 
-      <section className="mb-6">
-        <h3 className="font-semibold mb-4">Vendas por Produto</h3>
+      {/* Vendas por produto */}
+      <section className="mb-8">
+        <h3 className="font-semibold text-lg mb-5 text-indigo-700">Vendas por Produto</h3>
         {resumoPorProduto.length === 0 ? (
-          <p>Nenhuma venda encontrada no período.</p>
+          <p className="text-gray-600">Nenhuma venda encontrada no período.</p>
         ) : (
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={resumoPorProduto} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <XAxis dataKey="nome" />
-              <YAxis />
-              <Tooltip formatter={(value: number) => value.toFixed(2)} />
-              <Legend />
-              <Bar dataKey="quantidadeTotal" fill="#8884d8" name="Quantidade" />
-              <Bar dataKey="receitaTotal" fill="#82ca9d" name="Receita (R$)" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="w-full h-72 sm:h-80">
+            <ResponsiveContainer>
+              <BarChart
+                data={resumoPorProduto}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <XAxis dataKey="nome" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip formatter={(value: number) => value.toFixed(2)} />
+                <Legend />
+                <Bar dataKey="quantidadeTotal" fill="#6366f1" name="Quantidade" />
+                <Bar dataKey="receitaTotal" fill="#34d399" name="Receita (R$)" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </section>
 
+      {/* Lista de vendas */}
       <section>
-        <h3 className="font-semibold mb-4">Lista de Vendas</h3>
+        <h3 className="font-semibold text-lg mb-4 text-indigo-700">Lista de Vendas</h3>
         {loading ? (
-          <p>Carregando vendas...</p>
+          <p className="text-gray-600">Carregando vendas...</p>
         ) : vendas.length === 0 ? (
-          <p>Nenhuma venda encontrada no período.</p>
+          <p className="text-gray-600">Nenhuma venda encontrada no período.</p>
         ) : (
-          <table className="w-full border-collapse border">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border px-2 py-1 text-left">Produto</th>
-                <th className="border px-2 py-1 text-left">Quantidade</th>
-                <th className="border px-2 py-1 text-left">Unidade</th>
-                <th className="border px-2 py-1 text-left">Preço Unitário (R$)</th>
-                <th className="border px-2 py-1 text-left">Data</th>
-              </tr>
-            </thead>
-            <tbody>
-              {vendas.map((venda) => (
-                <tr key={venda.id} className="border-b">
-                  <td className="border px-2 py-1">{venda.nome}</td>
-                  <td className="border px-2 py-1">{venda.quantidade}</td>
-                  <td className="border px-2 py-1">{venda.unidade}</td>
-                  <td className="border px-2 py-1">
-                    {venda.valorVenda ? venda.valorVenda.toFixed(2) : '—'}
-                  </td>
-                  <td className="border px-2 py-1">{venda.data.toDate().toLocaleString()}</td>
+          <div className="overflow-x-auto rounded-lg shadow-md">
+            <table className="min-w-full border-collapse border border-gray-200">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">
+                    Produto
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">
+                    Quantidade
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">
+                    Unidade
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">
+                    Preço Unitário (R$)
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">
+                    Data
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {vendas.map((venda) => (
+                  <tr
+                    key={venda.id}
+                    className="border-b border-gray-200 hover:bg-indigo-50 transition"
+                  >
+                    <td className="border border-gray-300 px-4 py-2 text-sm">{venda.nome}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-sm">{venda.quantidade}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-sm">{venda.unidade}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-sm">
+                      {venda.valorVenda ? venda.valorVenda.toFixed(2) : '—'}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2 text-sm">
+                      {venda.data.toDate().toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>

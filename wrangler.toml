@@ -1,0 +1,10 @@
+name = "bebidafacil"            # Nome do seu projeto, pode ser o que quiser
+compatibility_date = "2023-01-01"       # Data para compatibilidade, pode usar hoje
+
+# Informações da sua conta Cloudflare (você pega no painel do Cloudflare)
+account_id = "500901dce0585e8a6547d1017725c581"
+
+# Configuração para Cloudflare Pages (site estático)
+[site]
+bucket = "./dist"                       # Pasta do build gerada pelo Vite
+entry-point = "workers-site"            # padrão para projetos com Pages + Workers
