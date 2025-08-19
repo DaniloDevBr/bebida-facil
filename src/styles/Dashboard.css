@@ -53,16 +53,16 @@
 
 /* Logout */
 .logout {
-  padding: 20px; /* maior padding para ocupar espaço */
+  padding: 20px;
   border-top: 1px solid #ddd;
 }
 
 .logout button {
   width: 100%;
-  background: #dc3545; /* vermelho para diferenciar */
+  background: #dc3545;
   color: #fff;
   border: none;
-  padding: 12px 0; /* altura maior */
+  padding: 12px 0;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;

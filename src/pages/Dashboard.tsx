@@ -126,6 +126,7 @@ export default function Dashboard() {
       <footer className="footer">
         © 2025 Cloud Tecnologia. Todos os direitos reservados.
       </footer>
+      <div className="footer-reserved">© 2025 Cloud Tecnologia. Todos os direitos reservados.</div>
     </div>
   );
 }
