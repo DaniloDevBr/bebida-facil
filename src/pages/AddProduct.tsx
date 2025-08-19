@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { db } from '../services/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
-const categoriasFixas = ['Cerveja', 'Energético', 'Destilado', 'Refrigerante', 'Alimento', 'Outros'];
+const categoriasFixas = ['Cerveja', 'Energético', 'Destilado', 'Refrigerante', 'Porções', 'Outros'];
 
 interface ProdutoForm {
   nome: string;

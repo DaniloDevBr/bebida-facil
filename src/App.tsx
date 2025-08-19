@@ -8,10 +8,12 @@ import Sales from "./pages/Sales";
 import Relatorios from "./pages/Relatorios";
 import Estoque from "./pages/Estoque";
 import Notificacoes from "./pages/Notificacoes";
+import CatalogoClientes from "./pages/CatalogoClientes";
 import { AuthProvider, useAuth } from "./services/AuthContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import "./index.css";
 
+// Rota privada para admin
 const PrivateRoute = ({ children }: { children: React.ReactElement }) => {
   const { user, loading } = useAuth();
 
@@ -34,8 +36,9 @@ function App() {
           {/* Rotas públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/catalogo" element={<CatalogoClientes />} />
 
-          {/* Rotas privadas */}
+          {/* Rotas privadas (admin) */}
           <Route
             path="/"
             element={
@@ -46,7 +49,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/produtos"
             element={
@@ -67,7 +69,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/vendas"
             element={
@@ -98,7 +99,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/notificacoes"
             element={
@@ -110,8 +110,8 @@ function App() {
             }
           />
 
-          {/* Redirecionamento para Dashboard */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Redirecionamento para Dashboard ou catálogo */}
+          <Route path="*" element={<Navigate to="/catalogo" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

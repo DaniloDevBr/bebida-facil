@@ -1,0 +1,104 @@
+.pedidos-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
+}
+
+h1 {
+  text-align: center;
+  color: #4f46e5;
+  margin-bottom: 2rem;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+.pedido-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+}
+
+.pedido-card:hover {
+  transform: translateY(-3px);
+}
+
+.pedido-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.status {
+  font-weight: bold;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  color: white;
+  font-size: 0.85rem;
+}
+
+.status.novo {
+  background-color: #3b82f6;
+}
+
+.status.confirmado {
+  background-color: #10b981;
+}
+
+.status.entregue {
+  background-color: #6b7280;
+}
+
+.produtos-pedido {
+  margin: 0.5rem 0;
+  padding-left: 1rem;
+}
+
+.produtos-pedido li {
+  margin-bottom: 0.25rem;
+}
+
+.total {
+  font-weight: bold;
+  text-align: right;
+  margin-top: 0.5rem;
+}
+
+.botoes-status {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.botoes-status button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  transition: background 0.2s;
+}
+
+.botoes-status button:first-child {
+  background-color: #4f46e5;
+}
+
+.botoes-status button:first-child:hover {
+  background-color: #4338ca;
+}
+
+.botoes-status button:last-child {
+  background-color: #10b981;
+}
+
+.botoes-status button:last-child:hover {
+  background-color: #059669;
+}
