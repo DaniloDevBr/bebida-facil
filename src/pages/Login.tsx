@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../services/AuthContext';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const { user, login, resetPassword } = useAuth();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,7 +25,7 @@ const Login: React.FC = () => {
     try {
       await login(email, password);
     } catch {
-      setError('Falha ao entrar. Verifique as credenciais.');
+      setError('Falha ao entrar. Verifique suas credenciais.');
     } finally {
       setSubmitting(false);
     }
@@ -51,32 +52,13 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700 flex items-center justify-center px-4">
-      <div className="bg-white bg-opacity-90 backdrop-blur-sm rounded-3xl shadow-2xl max-w-md w-full p-10 sm:p-12 animate-fadeInScale">
-        <h1 className="text-4xl font-extrabold mb-10 text-center text-gray-900 tracking-wide">
-          Bem-vindo de volta
-        </h1>
+    <div className="login-background">
+      <div className="login-card">
+        <h1 className="login-title">Bem-vindo à Adega Online 🍷</h1>
 
-        {error && (
-          <div
-            className="mb-6 bg-red-50 text-red-800 p-4 rounded-lg border border-red-200 flex items-center gap-3"
-            role="alert"
-          >
-            <svg
-              className="w-6 h-6 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-12.728 12.728M6.343 6.343l12.728 12.728" />
-            </svg>
-            <span>{error}</span>
-          </div>
-        )}
+        {error && <div className="alert alert-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-7">
+        <form onSubmit={handleSubmit} className="login-form">
           <input
             type="email"
             placeholder="E-mail"
@@ -84,11 +66,8 @@ const Login: React.FC = () => {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={submitting}
-            className="border border-gray-300 rounded-lg px-5 py-3 w-full shadow-sm placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-400 focus:border-indigo-600 transition"
-            id="email"
-            aria-label="E-mail"
+            className="input-field"
           />
-
           <input
             type="password"
             placeholder="Senha"
@@ -96,23 +75,18 @@ const Login: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={submitting}
-            className="border border-gray-300 rounded-lg px-5 py-3 w-full shadow-sm placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-400 focus:border-indigo-600 transition"
-            id="password"
-            aria-label="Senha"
+            className="input-field"
           />
-
           <button
             type="submit"
             disabled={submitting}
-            className={`bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg transition duration-300 ${
-              submitting ? 'opacity-75 cursor-not-allowed' : ''
-            }`}
+            className={`btn-primary ${submitting ? 'disabled' : ''}`}
           >
             {submitting ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
 
-        <div className="mt-5 flex justify-between items-center text-sm text-indigo-700 font-semibold">
+        <div className="login-footer">
           <button
             onClick={() => {
               setShowForgotModal(true);
@@ -120,75 +94,31 @@ const Login: React.FC = () => {
               setForgotError('');
               setForgotSuccess('');
             }}
-            className="hover:underline focus:outline-none"
+            className="link-button"
           >
             Esqueci minha senha
           </button>
-
-          <Link
-            to="/register"
-            className="hover:underline"
-          >
+          <Link to="/register" className="link-button">
             Cadastre-se
           </Link>
         </div>
 
-        {/* Modal de recuperação de senha */}
-        {showForgotModal && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 px-4"
-            aria-modal="true"
-            role="dialog"
-            aria-labelledby="modal-title"
-            aria-describedby="modal-desc"
+        <div className="catalogo-button-container">
+          <button
+            className="catalogo-button"
+            onClick={() => navigate("/catalogo")}
           >
-            <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full animate-fadeInScale relative">
-              <h2
-                id="modal-title"
-                className="text-2xl font-semibold mb-6 text-gray-900 text-center"
-              >
-                Recuperar Senha
-              </h2>
+            Ver Catálogo de Produtos
+          </button>
+        </div>
 
-              {forgotError && (
-                <div
-                  className="mb-4 bg-red-50 text-red-800 p-3 rounded-lg border border-red-200 flex items-center gap-2"
-                  role="alert"
-                >
-                  <svg
-                    className="w-5 h-5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-12.728 12.728M6.343 6.343l12.728 12.728" />
-                  </svg>
-                  <span>{forgotError}</span>
-                </div>
-              )}
-
-              {forgotSuccess && (
-                <div
-                  className="mb-4 bg-green-50 text-green-800 p-3 rounded-lg border border-green-200 flex items-center gap-2"
-                  role="alert"
-                >
-                  <svg
-                    className="w-5 h-5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>{forgotSuccess}</span>
-                </div>
-              )}
-
-              <form onSubmit={handleForgotPassword} className="flex flex-col gap-6">
+        {showForgotModal && (
+          <div className="modal-backdrop">
+            <div className="modal-card">
+              <h2 className="modal-title">Recuperar Senha</h2>
+              {forgotError && <div className="alert alert-error">{forgotError}</div>}
+              {forgotSuccess && <div className="alert alert-success">{forgotSuccess}</div>}
+              <form onSubmit={handleForgotPassword} className="login-form">
                 <input
                   type="email"
                   placeholder="Informe seu e-mail"
@@ -196,27 +126,22 @@ const Login: React.FC = () => {
                   onChange={(e) => setForgotEmail(e.target.value)}
                   required
                   disabled={loadingForgot}
-                  className="border border-gray-300 rounded-lg px-5 py-3 w-full shadow-sm placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-indigo-400 transition"
+                  className="input-field"
                   autoFocus
-                  id="forgot-email"
-                  aria-label="Informe seu e-mail para recuperação"
                 />
-
-                <div className="flex justify-end gap-4">
+                <div className="modal-buttons">
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(false)}
                     disabled={loadingForgot}
-                    className="px-5 py-2 rounded-xl bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold transition"
+                    className="btn-secondary"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={loadingForgot}
-                    className={`px-5 py-2 rounded-xl font-semibold text-white transition ${
-                      loadingForgot ? 'bg-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
-                    }`}
+                    className={`btn-primary ${loadingForgot ? 'disabled' : ''}`}
                   >
                     {loadingForgot ? 'Enviando...' : 'Enviar E-mail'}
                   </button>
@@ -229,11 +154,190 @@ const Login: React.FC = () => {
 
       <style>
         {`
-          @keyframes fadeInScale {
-            0% { opacity: 0; transform: scale(0.95); }
-            100% { opacity: 1; transform: scale(1); }
-          }
-          .animate-fadeInScale { animation: fadeInScale 0.3s ease forwards; }
+        /* Background elegante de adega */
+        .login-background {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #4b1d1d 0%, #7b2e2e 50%, #f7f0eb 100%);
+          font-family: 'Poppins', sans-serif;
+          padding: 1rem;
+        }
+
+        /* Card */
+        .login-card {
+          background: rgba(255,255,255,0.95);
+          backdrop-filter: blur(12px);
+          border-radius: 2rem;
+          padding: 3rem 2rem;
+          max-width: 420px;
+          width: 100%;
+          box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+          animation: fadeInScale 0.4s ease forwards;
+          text-align: center;
+        }
+
+        .login-title {
+          font-size: 2.25rem;
+          font-weight: 900;
+          color: #7b1d1d;
+          margin-bottom: 2rem;
+        }
+
+        .login-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .input-field {
+          padding: 0.75rem 1rem;
+          font-size: 1rem;
+          border-radius: 1rem;
+          border: 1px solid #ccc;
+          outline: none;
+          transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+          border-color: #7b1d1d;
+          box-shadow: 0 0 0 3px rgba(123,29,29,0.2);
+        }
+
+        .btn-primary {
+          background-color: #7b1d1d;
+          color: white;
+          font-weight: 700;
+          padding: 0.75rem 1rem;
+          border-radius: 1rem;
+          cursor: pointer;
+          transition: background 0.3s ease;
+        }
+
+        .btn-primary:hover {
+          background-color: #5c1313;
+        }
+
+        .btn-primary.disabled {
+          background-color: #c49a9a;
+          cursor: not-allowed;
+        }
+
+        .btn-secondary {
+          background-color: #ccc;
+          color: #111;
+          font-weight: 600;
+          padding: 0.5rem 1rem;
+          border-radius: 1rem;
+          cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+          background-color: #aaa;
+        }
+
+        .login-footer {
+          margin-top: 1.5rem;
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.875rem;
+          color: #7b1d1d;
+        }
+
+        .link-button {
+          background: none;
+          border: none;
+          color: #7b1d1d;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .link-button:hover {
+          text-decoration: underline;
+        }
+
+        .catalogo-button-container {
+          margin-top: 2rem;
+        }
+
+        .catalogo-button {
+          width: 100%;
+          padding: 0.75rem;
+          background-color: #d97706;
+          color: white;
+          border-radius: 1rem;
+          border: none;
+          font-weight: bold;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+
+        .catalogo-button:hover {
+          background-color: #b45309;
+        }
+
+        /* Modal */
+        .modal-backdrop {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.6);
+          backdrop-filter: blur(4px);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 50;
+          padding: 1rem;
+        }
+
+        .modal-card {
+          background: #fff;
+          border-radius: 2rem;
+          padding: 2rem;
+          max-width: 400px;
+          width: 100%;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+          animation: fadeInScale 0.3s ease forwards;
+        }
+
+        .modal-title {
+          font-size: 1.75rem;
+          font-weight: 700;
+          margin-bottom: 1rem;
+          text-align: center;
+          color: #7b1d1d;
+        }
+
+        .modal-buttons {
+          display: flex;
+          justify-content: flex-end;
+          gap: 0.5rem;
+        }
+
+        /* Alertas */
+        .alert {
+          padding: 0.75rem 1rem;
+          border-radius: 1rem;
+          font-size: 0.875rem;
+          margin-bottom: 1rem;
+        }
+
+        .alert-error {
+          background: #fee2e2;
+          color: #b91c1c;
+        }
+
+        .alert-success {
+          background: #dcfce7;
+          color: #15803d;
+        }
+
+        /* Animação */
+        @keyframes fadeInScale {
+          0% { opacity: 0; transform: scale(0.95); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+
         `}
       </style>
     </div>

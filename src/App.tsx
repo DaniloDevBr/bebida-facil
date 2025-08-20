@@ -12,6 +12,7 @@ import Estoque from "./pages/Estoque";
 import Notificacoes from "./pages/Notificacoes";
 import PedidosCliente from "./pages/PedidosCliente";
 import AdminPedidos from "./pages/AdminPedidos";
+import CatalogoClientes from "./pages/CatalogoClientes";
 import { AuthProvider, useAuth } from "./services/AuthContext";
 import { AuthRoleProvider, useAuthRole } from "./services/AuthRoleContext";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -55,7 +56,6 @@ const RoleProtectedRoute = ({
     return <Navigate to="/login" replace />;
   }
 
-  // Se role não estiver definida ou não estiver na lista, bloqueia acesso
   if (!role || !allowedRoles.includes(role)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-gray-700">
@@ -78,6 +78,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/loginclientes" element={<LoginClientes />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/catalogo" element={<CatalogoClientes />} />
 
             {/* Rotas privadas admins */}
             <Route
@@ -176,7 +177,7 @@ function App() {
             />
 
             {/* Redirecionamento padrão */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/catalogo" replace />} />
           </Routes>
         </Router>
       </AuthRoleProvider>

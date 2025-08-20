@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FiCheckCircle, FiBell } from "react-icons/fi";
-import "../styles/notificacoes.css"; // Crie este CSS ou adapte ao seu projeto
+import { db } from "../services/firebase";
+import { collection, onSnapshot, Timestamp } from "firebase/firestore";
+import "../styles/notificacoes.css";
 
 interface Notificacao {
-  id: number;
+  id: string;
   titulo: string;
   descricao: string;
   lida: boolean;
@@ -11,33 +13,41 @@ interface Notificacao {
 }
 
 const Notificacoes: React.FC = () => {
-  const [notificacoes, setNotificacoes] = useState<Notificacao[]>([
-    {
-      id: 1,
-      titulo: "Pedido recebido",
-      descricao: "Seu pedido #1234 foi recebido e está sendo processado.",
-      lida: false,
-      data: "2025-08-18 14:30",
-    },
-    {
-      id: 2,
-      titulo: "Promoção especial",
-      descricao: "Aproveite 20% de desconto em bebidas selecionadas!",
-      lida: false,
-      data: "2025-08-17 09:00",
-    },
-    {
-      id: 3,
-      titulo: "Pedido enviado",
-      descricao: "Seu pedido #1233 foi enviado e está a caminho.",
-      lida: true,
-      data: "2025-08-16 17:45",
-    },
-  ]);
+  const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
 
-  const marcarComoLida = (id: number) => {
-    setNotificacoes(prev =>
-      prev.map(n => (n.id === id ? { ...n, lida: true } : n))
+  useEffect(() => {
+    // escuta em tempo real a coleção de pedidos
+    const unsub = onSnapshot(collection(db, "pedidos"), (snapshot) => {
+      const novasNotificacoes: Notificacao[] = [];
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const pedido = change.doc.data();
+          const dataFormatada = pedido.criadoEm?.toDate
+            ? pedido.criadoEm.toDate().toLocaleString()
+            : new Date().toLocaleString();
+
+          novasNotificacoes.push({
+            id: change.doc.id,
+            titulo: `Novo pedido de ${pedido.clienteNome}`,
+            descricao: `Pedido #${change.doc.id} - Total: R$ ${pedido.total.toFixed(2)}`,
+            lida: false,
+            data: dataFormatada,
+          });
+        }
+      });
+
+      // adiciona novas notificações no topo
+      if (novasNotificacoes.length > 0) {
+        setNotificacoes((prev) => [...novasNotificacoes, ...prev]);
+      }
+    });
+
+    return () => unsub();
+  }, []);
+
+  const marcarComoLida = (id: string) => {
+    setNotificacoes((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, lida: true } : n))
     );
   };
 
@@ -48,11 +58,8 @@ const Notificacoes: React.FC = () => {
       </h1>
       <div className="notificacoes-list">
         {notificacoes.length === 0 && <p>Não há notificações.</p>}
-        {notificacoes.map(n => (
-          <div
-            key={n.id}
-            className={`notificacao-card ${n.lida ? "lida" : ""}`}
-          >
+        {notificacoes.map((n) => (
+          <div key={n.id} className={`notificacao-card ${n.lida ? "lida" : ""}`}>
             <div className="notificacao-info">
               <h3>{n.titulo}</h3>
               <p>{n.descricao}</p>
