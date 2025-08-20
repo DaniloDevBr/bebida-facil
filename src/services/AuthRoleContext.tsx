@@ -1,4 +1,3 @@
-// src/services/AuthRoleContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
@@ -17,24 +16,40 @@ export const AuthRoleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      setRole(null);
-      setLoading(false);
-      return;
-    }
-
     const fetchRole = async () => {
-      const docSnap = await getDoc(doc(db, 'usuarios', user.uid));
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setRole(data.role || 'cliente');
+      if (!user) {
+        setRole(null);
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      setLoading(true);
+      try {
+        const docSnap = await getDoc(doc(db, 'usuarios', user.uid));
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const userRole = data.role ? String(data.role).trim().toLowerCase() : 'cliente';
+          setRole(userRole === 'admin' ? 'admin' : 'cliente');
+        } else {
+          console.warn("Documento de usuário não encontrado, fallback para 'cliente'");
+          setRole('cliente');
+        }
+      } catch (err) {
+        console.error('Erro ao buscar role:', err);
+        setRole('cliente'); // fallback
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchRole();
   }, [user]);
 
-  return <AuthRoleContext.Provider value={{ role, loading }}>{children}</AuthRoleContext.Provider>;
+  return (
+    <AuthRoleContext.Provider value={{ role, loading }}>
+      {children}
+    </AuthRoleContext.Provider>
+  );
 };
 
 export const useAuthRole = () => useContext(AuthRoleContext);

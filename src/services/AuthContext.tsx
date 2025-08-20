@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from './firebase';
+import { auth, db } from './firebase';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -8,12 +8,13 @@ import {
   sendPasswordResetEmail,
   User,
 } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, role?: 'admin' | 'cliente') => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
@@ -36,8 +37,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const register = async (email: string, password: string) => {
-    await createUserWithEmailAndPassword(auth, email, password);
+  const register = async (email: string, password: string, role: 'admin' | 'cliente' = 'cliente') => {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+    await setDoc(doc(db, 'usuarios', cred.user.uid), {
+      email,
+      role,
+      createdAt: new Date(),
+    });
   };
 
   const logout = async () => {
@@ -48,8 +55,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await sendPasswordResetEmail(auth, email);
   };
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: 50 }}>Carregando...</div>;
-
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout, resetPassword }}>
       {children}
@@ -59,8 +64,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
-  }
+  if (!context) throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   return context;
 };

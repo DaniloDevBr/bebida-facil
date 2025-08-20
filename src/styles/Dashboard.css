@@ -2,20 +2,23 @@
 .dashboard-container {
   display: flex;
   min-height: 100vh;
-  background: #f5f6fa;
+  background: #f5ebeb; /* Vinho suave */
   position: relative;
   font-family: 'Inter', sans-serif;
+  color: #1f2937; /* Texto escuro global */
 }
 
 /* Sidebar */
 .sidebar {
   width: 250px;
-  background: #fff;
-  border-right: 1px solid #ddd;
+  background: #ffffffcc; /* Fundo branco suave com leve transparência */
+  border-right: 1px solid #d1d5db;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, background 0.3s ease;
+  backdrop-filter: blur(10px);
+  color: #1f2937; /* Texto escuro */
 }
 
 .sidebar-header {
@@ -23,7 +26,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #d1d5db;
 }
 
 .menu-btn {
@@ -31,6 +34,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
+  color: #374151;
 }
 
 .menu {
@@ -41,19 +45,20 @@
 
 .menu a {
   text-decoration: none;
-  color: #1f2937;
+  color: #1f2937; /* Texto escuro */
   margin: 12px 0;
   display: flex;
   align-items: center;
   font-weight: 500;
-  padding: 8px 12px;
-  border-radius: 6px;
-  transition: background 0.2s ease;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
   position: relative;
 }
 
 .menu a:hover {
   background: #e5e7eb;
+  color: #111827;
 }
 
 .menu a svg {
@@ -76,16 +81,16 @@
 /* Logout */
 .logout {
   padding: 20px;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid #d1d5db;
 }
 
 .logout button {
   width: 100%;
-  background: #dc3545;
+  background: #b2392e; /* Vinho escuro */
   color: #fff;
   border: none;
   padding: 12px 0;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
   display: flex;
@@ -100,15 +105,17 @@
 }
 
 .logout button:hover {
-  background: #c82333;
+  background: #7d1f18;
 }
 
 /* Conteúdo */
 .content {
   flex: 1;
   padding: 40px 30px;
+  color: #1f2937; /* Texto escuro */
 }
 
+/* Cards do dashboard */
 .cards {
   display: flex;
   gap: 20px;
@@ -117,18 +124,19 @@
 }
 
 .card {
-  background: #fff;
+  background: #ffffffcc; /* Fundo branco suave */
   padding: 20px 25px;
   border-radius: 12px;
   flex: 1;
   min-width: 220px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  color: #1f2937; /* Texto escuro */
 }
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .card h3 {
@@ -137,16 +145,17 @@
   justify-content: space-between;
   margin-bottom: 15px;
   font-size: 18px;
-  color: #4b5563;
+  color: #4b5563; /* Texto escuro suave */
 }
 
 /* Tabela */
 .table-container {
-  background: #fff;
+  background: #ffffffcc; /* Fundo branco suave */
   padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
   overflow-x: auto;
+  color: #1f2937; /* Texto escuro */
 }
 
 table {
@@ -157,9 +166,9 @@ table {
 
 th, td {
   padding: 12px 15px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #e5e7eb;
   text-align: left;
-  color: #374151;
+  color: #1f2937; /* Texto escuro */
 }
 
 th {
@@ -174,8 +183,8 @@ th {
   left: 0;
   padding: 10px 20px;
   font-size: 14px;
-  background: #f5f6fa;
-  color: #333;
+  background: #f5ebeb; /* Vinho suave */
+  color: #374151;
 }
 
 /* Direitos Reservados */
@@ -184,7 +193,7 @@ th {
   bottom: 0;
   left: 20px;
   font-size: 12px;
-  color: #555;
+  color: #6b7280;
 }
 
 /* Responsividade */

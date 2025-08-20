@@ -1,28 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/dashboard.css";
-import {
-  FiMenu,
-  FiX,
-  FiBox,
-  FiShoppingCart,
-  FiBarChart2,
-  FiBell,
-  FiLogOut,
-  FiTrendingUp,
-} from "react-icons/fi";
+import { FiMenu, FiX, FiBox, FiBarChart2, FiBell, FiLogOut, FiTrendingUp } from "react-icons/fi";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../services/firebase";
-import {
-  collection,
-  onSnapshot,
-  query,
-  orderBy,
-  limit,
-  updateDoc,
-  doc,
-  where,
-} from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, limit, updateDoc, doc } from "firebase/firestore";
 
 interface Produto {
   id: string;
@@ -42,7 +24,6 @@ interface Venda {
   data: any;
   valorCompra: number;
   valorVenda: number;
-  margemLucro: number;
 }
 
 interface Notificacao {
@@ -63,21 +44,39 @@ export default function Dashboard() {
   // Produtos em tempo real
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "produtos"), (snapshot) => {
-      const lista = snapshot.docs.map(
-        (doc) => ({ id: doc.id, ...(doc.data() as Omit<Produto, "id">) })
-      );
+      const lista: Produto[] = snapshot.docs.map(docSnap => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          nome: data.nome ?? "Produto sem nome",
+          quantidade: Number(data.quantidade ?? 0),
+          unidade: data.unidade ?? "un",
+          valorCompra: Number(data.valorCompra ?? 0),
+          valorVenda: Number(data.valorVenda ?? 0),
+        };
+      });
       setProdutos(lista);
     });
     return () => unsubscribe();
   }, []);
 
-  // Vendas em tempo real
+  // Vendas em tempo real (Últimas 20)
   useEffect(() => {
-    const q = query(collection(db, "vendas"), orderBy("data", "desc"), limit(10));
+    const q = query(collection(db, "vendas"), orderBy("data", "desc"), limit(20));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const lista = snapshot.docs.map(
-        (doc) => ({ id: doc.id, ...(doc.data() as Omit<Venda, "id">) })
-      );
+      const lista: Venda[] = snapshot.docs.map(docSnap => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          produtoId: data.produtoId ?? "",
+          nome: data.nome ?? "Produto sem nome",
+          quantidade: Number(data.quantidade ?? 0),
+          unidade: data.unidade ?? "un",
+          valorCompra: Number(data.valorCompra ?? 0),
+          valorVenda: Number(data.valorVenda ?? 0),
+          data: data.data ?? null,
+        };
+      });
       setVendas(lista);
     });
     return () => unsubscribe();
@@ -87,7 +86,7 @@ export default function Dashboard() {
   useEffect(() => {
     const q = query(collection(db, "notificacoes"), orderBy("data", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const lista = snapshot.docs.map((docSnap) => ({
+      const lista: Notificacao[] = snapshot.docs.map(docSnap => ({
         id: docSnap.id,
         ...(docSnap.data() as Omit<Notificacao, "id">),
       }));
@@ -96,19 +95,28 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, []);
 
-  // Contador de notificações não lidas
-  const notificacoesNaoLidas = notificacoes.filter((n) => !n.lida).length;
+  const notificacoesNaoLidas = notificacoes.filter(n => !n.lida).length;
 
-  // Marcar todas como lidas
   const marcarTodasComoLidas = async () => {
-    for (const n of notificacoes.filter((n) => !n.lida)) {
+    for (const n of notificacoes.filter(n => !n.lida)) {
       await updateDoc(doc(db, "notificacoes", n.id), { lida: true });
     }
   };
 
-  const totalProdutos = produtos.length;
-  const totalVendas = vendas.length;
-  const totalLucro = vendas.reduce((acc, v) => acc + (v.margemLucro ?? 0), 0);
+  // Cálculos em tempo real
+  const totalProdutos = produtos.reduce((acc, p) => acc + (Number(p.quantidade) || 0), 0);
+  const totalVendas = vendas.reduce((acc, v) => acc + (Number(v.quantidade) * Number(v.valorVenda)), 0);
+  const totalLucro = vendas.reduce(
+    (acc, v) => acc + (Number(v.valorVenda) - Number(v.valorCompra)) * Number(v.quantidade),
+    0
+  );
+
+  const formatData = (data: any) =>
+    data?.toDate
+      ? data.toDate().toLocaleString()
+      : data?.seconds
+      ? new Date(data.seconds * 1000).toLocaleString()
+      : "Data inválida";
 
   const handleLogout = async () => {
     try {
@@ -138,19 +146,14 @@ export default function Dashboard() {
             <FiBox /> Produtos
           </Link>
           <Link to="/vendas">
-            <FiShoppingCart /> Vendas
+            <FiBarChart2 /> Vendas
           </Link>
           <Link to="/relatorios">
             <FiBarChart2 /> Relatórios
           </Link>
-          <Link
-            to="/notificacoes"
-            onClick={marcarTodasComoLidas}
-          >
+          <Link to="/notificacoes" onClick={marcarTodasComoLidas}>
             <FiBell /> Notificações
-            {notificacoesNaoLidas > 0 && (
-              <span className="badge">{notificacoesNaoLidas}</span>
-            )}
+            {notificacoesNaoLidas > 0 && <span className="badge">{notificacoesNaoLidas}</span>}
           </Link>
         </nav>
 
@@ -161,7 +164,7 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* Conteúdo Principal */}
+      {/* Conteúdo */}
       <main className="content">
         <h1>Visão Geral</h1>
 
@@ -175,9 +178,9 @@ export default function Dashboard() {
 
           <div className="card">
             <h3>
-              Vendas <FiShoppingCart />
+              Vendas <FiBarChart2 />
             </h3>
-            <p>{totalVendas}</p>
+            <p>R$ {totalVendas.toFixed(2)}</p>
           </div>
 
           <div className="card">
@@ -203,20 +206,12 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {vendas.map((venda) => (
+                {vendas.map(venda => (
                   <tr key={venda.id}>
                     <td>{venda.nome}</td>
-                    <td>
-                      {venda.quantidade} {venda.unidade}
-                    </td>
-                    <td>
-                      R$ {(venda.quantidade * venda.valorVenda).toFixed(2)}
-                    </td>
-                    <td>
-                      {venda.data?.toDate
-                        ? venda.data.toDate().toLocaleString()
-                        : "Data inválida"}
-                    </td>
+                    <td>{venda.quantidade} {venda.unidade}</td>
+                    <td>R$ {(Number(venda.quantidade) * Number(venda.valorVenda)).toFixed(2)}</td>
+                    <td>{formatData(venda.data)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -225,11 +220,9 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="footer">
         © 2025 Cloud Tecnologia. Todos os direitos reservados.
       </footer>
-      <div className="footer-reserved">© 2025 Cloud Tecnologia. Todos os direitos reservados.</div>
     </div>
   );
 }

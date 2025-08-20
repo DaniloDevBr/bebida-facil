@@ -8,7 +8,7 @@ interface Produto {
   id: string;
   nome: string;
   categoria: string;
-  quantidade: number;
+  quantidade: number; // estoque real
   unidade: string;
   valorCompra: number;
   valorVenda: number;
@@ -20,16 +20,23 @@ const Products = () => {
   const [estoqueAdicional, setEstoqueAdicional] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [carrinho, setCarrinho] = useState<Record<string, number>>({});
 
   const fetchProdutos = async () => {
     setLoading(true);
     try {
       const querySnapshot = await getDocs(collection(db, 'produtos'));
-      const lista: Produto[] = querySnapshot.docs.map(docSnap => ({
-        id: docSnap.id,
-        ...(docSnap.data() as Omit<Produto, 'id'>)
-      }));
+      const lista: Produto[] = querySnapshot.docs.map(docSnap => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          nome: data.nome,
+          categoria: data.categoria || 'Sem Categoria',
+          quantidade: data.quantidade !== undefined ? Number(data.quantidade) : 0,
+          unidade: data.unidade || 'un',
+          valorCompra: Number(data.valorCompra) || 0,
+          valorVenda: Number(data.valorVenda) || 0,
+        };
+      });
       setProdutos(lista);
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
@@ -74,21 +81,8 @@ const Products = () => {
     }
   };
 
-  const handleAdicionarCarrinho = (produto: Produto, qtd: number) => {
-    if (qtd <= 0 || qtd > produto.quantidade) {
-      alert(`Informe uma quantidade válida (até ${produto.quantidade}).`);
-      return;
-    }
-    setCarrinho(prev => ({
-      ...prev,
-      [produto.id]: (prev[produto.id] || 0) + qtd
-    }));
-    alert(`Adicionado ${qtd} ${produto.unidade} de ${produto.nome} ao carrinho!`);
-  };
-
   if (loading) return <div className="text-center p-6 text-gray-700">Carregando produtos...</div>;
 
-  // Agrupar produtos por categoria
   const categorias = Array.from(new Set(produtos.map(p => p.categoria)));
 
   return (
@@ -113,7 +107,7 @@ const Products = () => {
                     <div>
                       <h3 className="card-title">{produto.nome}</h3>
                       <p className="card-quantity">
-                        Quantidade: <span>{produto.quantidade}</span> {produto.unidade}
+                        Estoque: <span>{produto.quantidade}</span> {produto.unidade}
                       </p>
                       <p className="card-values">
                         Compra: <span>R$ {produto.valorCompra.toFixed(2)}</span> | Venda: <span>R$ {produto.valorVenda.toFixed(2)}</span>
@@ -140,28 +134,6 @@ const Products = () => {
                           min={0}
                         />
                         <button onClick={() => handleAdicionarEstoque(produto.id)} className="btn-add-stock">+</button>
-                      </div>
-
-                      <div className="add-cart">
-                        <input
-                          type="number"
-                          placeholder="Qtd p/ carrinho"
-                          min={1}
-                          max={produto.quantidade}
-                          value={carrinho[produto.id] ?? ''}
-                          onChange={e => {
-                            const val = Number(e.target.value);
-                            if (val <= produto.quantidade) {
-                              setCarrinho(prev => ({ ...prev, [produto.id]: val }));
-                            } else {
-                              alert(`Máximo disponível: ${produto.quantidade}`);
-                              setCarrinho(prev => ({ ...prev, [produto.id]: produto.quantidade }));
-                            }
-                          }}
-                        />
-                        <button onClick={() => handleAdicionarCarrinho(produto, carrinho[produto.id] || 0)} className="btn-add-cart">
-                          Adicionar ao carrinho
-                        </button>
                       </div>
                     </div>
                   </li>

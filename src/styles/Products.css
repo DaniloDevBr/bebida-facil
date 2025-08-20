@@ -6,6 +6,7 @@
   padding: 2rem;
   background: linear-gradient(135deg, #4b1d1d 0%, #7b2e2e 50%, #f7f0eb 100%);
   font-family: 'Poppins', sans-serif;
+  color: #fff;
 }
 
 /* Header e ações */
@@ -71,11 +72,11 @@
 
 /* Card individual */
 .card-item {
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   border-radius: 2rem;
   padding: 1.5rem;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -109,8 +110,7 @@
 }
 
 .btn-delete,
-.btn-add-stock,
-.btn-add-cart {
+.btn-add-stock {
   background-color: #7b1d1d;
   color: white;
   padding: 0.5rem 0.75rem;
@@ -122,8 +122,7 @@
 }
 
 .btn-delete:hover,
-.btn-add-stock:hover,
-.btn-add-cart:hover {
+.btn-add-stock:hover {
   background-color: #5c1313;
 }
 
@@ -133,8 +132,7 @@
 }
 
 /* Inputs de quantidade */
-.add-stock input,
-.add-cart input {
+.add-stock input {
   width: 60px;
   padding: 0.5rem;
   border-radius: 1rem;
@@ -145,10 +143,9 @@
   transition: all 0.3s ease;
 }
 
-.add-stock input:focus,
-.add-cart input:focus {
+.add-stock input:focus {
   border-color: #7b1d1d;
-  box-shadow: 0 0 0 3px rgba(123,29,29,0.2);
+  box-shadow: 0 0 0 3px rgba(123, 29, 29, 0.2);
 }
 
 /* Responsividade */
@@ -162,4 +159,25 @@
   .btn-add {
     width: 100%;
   }
+}
+
+/* Menu legível */
+.cards-grid .card-item {
+  color: #000; /* Texto dentro dos cards */
+}
+
+.card-quantity,
+.card-values {
+  color: #4b1d1d;
+}
+
+.categoria-title {
+  color: #fff; /* Título da categoria */
+}
+
+.btn-back,
+.btn-add,
+.btn-delete,
+.btn-add-stock {
+  color: #fff;
 }

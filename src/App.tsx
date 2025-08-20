@@ -18,22 +18,7 @@ import { AuthRoleProvider, useAuthRole } from "./services/AuthRoleContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import "./index.css";
 
-// Rota privada básica (usuário logado)
-const PrivateRoute = ({ children }: { children: React.ReactElement }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-gray-700">
-        Carregando...
-      </div>
-    );
-  }
-
-  return user ? children : <Navigate to="/login" replace />;
-};
-
-// Rota privada com role
+// 🔹 Rota privada baseada em role
 const RoleProtectedRoute = ({
   children,
   allowedRoles,
@@ -44,25 +29,65 @@ const RoleProtectedRoute = ({
   const { user, loading } = useAuth();
   const { role, loading: loadingRole } = useAuthRole();
 
-  if (loading || loadingRole) {
+  if (loading || loadingRole)
     return (
       <div className="flex items-center justify-center min-h-screen text-gray-700">
         Carregando...
       </div>
     );
-  }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!user) return <Navigate to="/loginclientes" replace />;
 
-  if (!role || !allowedRoles.includes(role)) {
+  const userRole = role?.toLowerCase();
+  if (!userRole || !allowedRoles.map(r => r.toLowerCase()).includes(userRole)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-gray-700">
         <h2 className="text-2xl font-bold mb-4">Acesso negado</h2>
         <p>Sua conta não tem permissão para acessar esta página.</p>
       </div>
     );
+  }
+
+  return children;
+};
+
+// 🔹 Redirecionamento raiz baseado na role
+const HomeRedirect = () => {
+  const { user, loading } = useAuth();
+  const { role, loading: loadingRole } = useAuthRole();
+
+  if (loading || loadingRole)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-700">
+        Carregando...
+      </div>
+    );
+
+  if (!user) return <Navigate to="/loginclientes" replace />;
+
+  const userRole = role?.toLowerCase();
+  if (userRole === "admin") return <Navigate to="/dashboard" replace />;
+  if (userRole === "cliente") return <Navigate to="/catalogo" replace />;
+
+  return <Navigate to="/loginclientes" replace />;
+};
+
+// 🔹 Rota pública protegida (bloqueia catálogo público se logado)
+const PublicOnlyRoute = ({ children }: { children: React.ReactElement }) => {
+  const { user, loading } = useAuth();
+  const { role, loading: loadingRole } = useAuthRole();
+
+  if (loading || loadingRole)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-700">
+        Carregando...
+      </div>
+    );
+
+  if (user) {
+    const userRole = role?.toLowerCase();
+    if (userRole === "admin") return <Navigate to="/dashboard" replace />;
+    if (userRole === "cliente") return <Navigate to="/catalogo" replace />;
   }
 
   return children;
@@ -78,11 +103,23 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/loginclientes" element={<LoginClientes />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/catalogo" element={<CatalogoClientes />} />
+
+            {/* Catálogo público */}
+            <Route
+              path="/catalogo-publico"
+              element={
+                <PublicOnlyRoute>
+                  <CatalogoClientes />
+                </PublicOnlyRoute>
+              }
+            />
+
+            {/* Redirecionamento raiz */}
+            <Route path="/" element={<HomeRedirect />} />
 
             {/* Rotas privadas admins */}
             <Route
-              path="/"
+              path="/dashboard"
               element={
                 <RoleProtectedRoute allowedRoles={["admin"]}>
                   <ErrorBoundary>
@@ -151,6 +188,16 @@ function App() {
                 </RoleProtectedRoute>
               }
             />
+            <Route
+              path="/admin/pedidos"
+              element={
+                <RoleProtectedRoute allowedRoles={["admin"]}>
+                  <ErrorBoundary>
+                    <AdminPedidos />
+                  </ErrorBoundary>
+                </RoleProtectedRoute>
+              }
+            />
 
             {/* Rotas privadas clientes */}
             <Route
@@ -163,21 +210,19 @@ function App() {
                 </RoleProtectedRoute>
               }
             />
-
-            {/* Rotas privadas admin pedidos */}
             <Route
-              path="/admin/pedidos"
+              path="/catalogo"
               element={
-                <RoleProtectedRoute allowedRoles={["admin"]}>
+                <RoleProtectedRoute allowedRoles={["cliente"]}>
                   <ErrorBoundary>
-                    <AdminPedidos />
+                    <CatalogoClientes />
                   </ErrorBoundary>
                 </RoleProtectedRoute>
               }
             />
 
-            {/* Redirecionamento padrão */}
-            <Route path="*" element={<Navigate to="/catalogo" replace />} />
+            {/* Redirecionamento wildcard */}
+            <Route path="*" element={<Navigate to="/loginclientes" replace />} />
           </Routes>
         </Router>
       </AuthRoleProvider>

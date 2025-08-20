@@ -1,0 +1,107 @@
+.relatorios-container {
+  max-width: 5xl;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-family: 'Inter', sans-serif;
+}
+
+.back-btn {
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  background: #e5e7eb;
+  color: #111827;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.back-btn:hover {
+  background: #d1d5db;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4f46e5;
+  margin-bottom: 1rem;
+}
+
+.filtro-datas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+}
+.filtro-datas label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: #374151;
+}
+.filtro-datas input[type="date"] {
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+  outline: none;
+}
+.filtro-datas button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.filtro-datas button:nth-child(3) { background: #4f46e5; }
+.filtro-datas button:nth-child(3):hover { background: #4338ca; }
+.filtro-datas button:nth-child(4) { background: #10b981; }
+.filtro-datas button:nth-child(4):hover { background: #059669; }
+.filtro-datas button:disabled { background: #9ca3af; cursor: not-allowed; }
+
+.totais-gerais {
+  background: #eef2ff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.05);
+}
+.totais-gerais p {
+  color: #374151;
+  margin: 0.25rem 0;
+}
+
+.grafico {
+  margin-bottom: 1.5rem;
+}
+
+.lista-vendas {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.lista-vendas table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+.lista-vendas th, .lista-vendas td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  border: 1px solid #e5e7eb;
+}
+.lista-vendas th {
+  background: #f3f4f6;
+  font-weight: 600;
+  color: #374151;
+}
+.lista-vendas tr:hover {
+  background: #eef2ff;
+  transition: 0.2s;
+}

@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { useAuth } from '../services/AuthContext';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, useNavigate, Link } from 'react-router-dom';
+import "../styles/register.css";
 
 const Register: React.FC = () => {
   const { user, register } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [role, setRole] = useState<'cliente' | 'admin'>('cliente');
+  const [adminSecret, setAdminSecret] = useState('');
   const [error, setError] = useState('');
+
+  const ADMIN_SECRET = "Tl3500!@"; 
 
   if (user) {
     return <Navigate to="/" />;
@@ -21,33 +27,43 @@ const Register: React.FC = () => {
       return;
     }
 
+    if (role === "admin" && adminSecret !== ADMIN_SECRET) {
+      setError("Senha de administrador incorreta.");
+      return;
+    }
+
     try {
       setError('');
-      await register(email, password);
+      await register(email, password, role);
+
+      // 🔹 Redireciona baseado no papel
+      if (role === "cliente") {
+        navigate("/catalogocliente");
+      } else {
+        navigate("/dashboard");
+      }
     } catch {
       setError('Falha ao criar a conta.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center px-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
-        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Cadastro</h1>
+    <div className="register-container">
+      <div className="register-box">
+        <h1 className="register-title">Cadastro</h1>
 
         {error && (
-          <div className="mb-4 bg-red-100 text-red-700 p-3 rounded border border-red-300">
-            {error}
-          </div>
+          <div className="register-error">{error}</div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="register-form">
           <input
             type="email"
             placeholder="E-mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+            className="register-input"
           />
 
           <input
@@ -56,7 +72,7 @@ const Register: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+            className="register-input"
           />
 
           <input
@@ -65,28 +81,40 @@ const Register: React.FC = () => {
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
             required
-            className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+            className="register-input"
           />
 
-          <button
-            type="submit"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded shadow transition"
+          <select 
+            value={role} 
+            onChange={(e) => setRole(e.target.value as "cliente" | "admin")} 
+            className="register-select"
           >
+            <option value="cliente">Cliente</option>
+            <option value="admin">Administrador</option>
+          </select>
+
+          {role === "admin" && (
+            <input
+              type="password"
+              placeholder="Senha de Administrador"
+              value={adminSecret}
+              onChange={(e) => setAdminSecret(e.target.value)}
+              className="register-input"
+            />
+          )}
+
+          <button type="submit" className="register-button">
             Cadastrar
           </button>
         </form>
 
-        <p className="mt-6 text-center text-gray-600">
+        <p className="register-text">
           Já tem conta?{' '}
-          <Link to="/login" className="text-indigo-600 hover:text-indigo-800 font-semibold">
-            Faça login
-          </Link>
+          <Link to="/login" className="register-link">Faça login</Link>
         </p>
-        <p className="mt-2 text-center text-gray-600">
+        <p className="register-text">
           Esqueceu a senha?{' '}
-          <Link to="/forgot-password" className="text-indigo-600 hover:text-indigo-800 font-semibold">
-            Recuperar senha
-          </Link>
+          <Link to="/forgot-password" className="register-link">Recuperar senha</Link>
         </p>
       </div>
     </div>

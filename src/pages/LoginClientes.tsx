@@ -1,22 +1,23 @@
 // src/pages/LoginCliente.tsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../services/firebase';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../services/firebase";
 
 export default function LoginCliente() {
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, senha);
-      navigate('/produtos'); // redireciona para a tela de produtos
+      // substitui o histórico, assim o "voltar" leva para login
+      navigate("/produtos", { replace: true });
     } catch (e) {
       console.error(e);
-      setErro('E-mail ou senha inválidos.');
+      setErro("E-mail ou senha inválidos.");
     }
   };
 
@@ -28,14 +29,14 @@ export default function LoginCliente() {
         type="email"
         placeholder="E-mail"
         value={email}
-        onChange={e => setEmail(e.target.value)}
+        onChange={(e) => setEmail(e.target.value)}
         className="w-full border rounded px-3 py-2 mb-3"
       />
       <input
         type="password"
         placeholder="Senha"
         value={senha}
-        onChange={e => setSenha(e.target.value)}
+        onChange={(e) => setSenha(e.target.value)}
         className="w-full border rounded px-3 py-2 mb-3"
       />
       <button

@@ -33,7 +33,7 @@ interface Venda {
   data: Timestamp;
   valorCompra: number;
   valorVenda: number;
-  margemLucro: number;
+  margemLucro?: number; // opcional, será calculado se não existir
 }
 
 const Sales = () => {
@@ -69,7 +69,9 @@ const Sales = () => {
       const querySnapshot = await getDocs(q);
       const lista: Venda[] = [];
       querySnapshot.forEach((docSnap) => {
-        lista.push({ id: docSnap.id, ...(docSnap.data() as Omit<Venda, 'id'>) });
+        const data = docSnap.data() as Omit<Venda, 'id'>;
+        const margemLucro = (data.valorVenda - data.valorCompra) * data.quantidade;
+        lista.push({ id: docSnap.id, ...data, margemLucro });
       });
       setVendas(lista);
     } catch (error) {
@@ -153,36 +155,23 @@ const Sales = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto bg-white rounded-2xl shadow-md mt-8 mb-20">
-      <button
-        onClick={() => navigate('/')}
-        className="mb-6 px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold transition"
-      >
-        ← Voltar ao Menu Inicial
-      </button>
+    <div className="sales-container">
+      <button onClick={() => navigate('/')} className="back-btn">← Voltar ao Menu Inicial</button>
 
-      <h2 className="text-4xl font-bold mb-8 text-indigo-700 tracking-wide">Registrar Venda</h2>
+      <h2>Registrar Venda</h2>
 
       {mensagem && (
-        <div
-          className={`mb-6 p-4 rounded border ${
-            mensagem.tipo === 'sucesso'
-              ? 'bg-green-50 border-green-400 text-green-700'
-              : 'bg-red-50 border-red-400 text-red-700'
-          }`}
-          role="alert"
-        >
+        <div className={`alert ${mensagem.tipo === 'sucesso' ? 'alert-success' : 'alert-error'}`} role="alert">
           {mensagem.texto}
         </div>
       )}
 
-      <form onSubmit={handleVenda} className="space-y-6">
-        <label className="block">
-          <span className="text-gray-700 font-medium mb-2 block">Produto</span>
+      <form onSubmit={handleVenda}>
+        <label>
+          <span>Produto</span>
           <select
             value={produtoSelecionado}
             onChange={(e) => setProdutoSelecionado(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
             disabled={loading || submitting}
             required
           >
@@ -195,69 +184,43 @@ const Sales = () => {
           </select>
         </label>
 
-        <label className="block">
-          <span className="text-gray-700 font-medium mb-2 block">Quantidade Vendida</span>
+        <label>
+          <span>Quantidade Vendida</span>
           <input
             type="number"
             placeholder="Digite a quantidade"
             value={quantidadeVendida}
             onChange={(e) => setQuantidadeVendida(Number(e.target.value))}
-            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
             min={1}
             disabled={loading || submitting}
             required
           />
         </label>
 
-        <button
-          type="submit"
-          disabled={submitting || loading}
-          className={`w-full py-3 rounded-lg font-semibold text-white transition shadow ${
-            submitting || loading
-              ? 'bg-indigo-300 cursor-not-allowed'
-              : 'bg-indigo-600 hover:bg-indigo-700'
-          }`}
-        >
+        <button type="submit" disabled={submitting || loading}>
           {submitting ? 'Registrando...' : 'Registrar Saída'}
         </button>
       </form>
 
-      <h3 className="text-3xl font-semibold mt-12 mb-6 text-indigo-700 tracking-wide">Últimas Vendas</h3>
+      <h3>Últimas Vendas</h3>
       {vendas.length === 0 ? (
-        <p className="text-gray-600 text-center">Nenhuma venda registrada ainda.</p>
+        <p className="text-center">Nenhuma venda registrada ainda.</p>
       ) : (
-        <ul className="space-y-4 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-gray-100">
+        <ul className="sales-list">
           {vendas.map((venda) => (
-            <li
-              key={venda.id}
-              className="border border-gray-300 rounded-2xl p-5 bg-gray-50 hover:bg-gray-100 transition flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4"
-            >
-              <div className="flex-1 min-w-0">
-                <strong className="text-indigo-700 text-lg block truncate">{venda.nome}</strong>
-                <p className="text-gray-700 mt-1">
-                  Quantidade: <span className="font-semibold">{venda.quantidade} {venda.unidade}</span>
-                </p>
-                <p className="text-gray-700 mt-1 text-sm">
-                  Compra: <strong>R$ {venda.valorCompra?.toFixed(2) ?? '0.00'}</strong> / Venda: <strong>R$ {venda.valorVenda?.toFixed(2) ?? '0.00'}</strong>
-                </p>
-                <p className={`font-semibold mt-1 ${
-                    (venda.margemLucro ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'
-                  } text-sm`}>
+            <li key={venda.id} className="sales-item">
+              <div className="info">
+                <strong>{venda.nome}</strong>
+                <p>Quantidade: <span className="font-semibold">{venda.quantidade} {venda.unidade}</span></p>
+                <p>Compra: R$ {venda.valorCompra?.toFixed(2) ?? '0.00'} / Venda: R$ {venda.valorVenda?.toFixed(2) ?? '0.00'}</p>
+                <p className={`lucro ${venda.margemLucro! >= 0 ? 'lucro-positivo' : 'lucro-negativo'}`}>
                   Lucro: R$ {(venda.margemLucro ?? 0).toFixed(2)}
                 </p>
               </div>
 
-              <div className="flex flex-row items-center gap-3 mt-2 sm:mt-0 sm:ml-6">
-                <div className="text-xs text-gray-500 whitespace-nowrap">
-                  {venda.data?.toDate ? venda.data.toDate().toLocaleString() : 'Data inválida'}
-                </div>
-                <button
-                  onClick={() => handleExcluirVenda(venda)}
-                  disabled={submitting}
-                  className="text-red-500 hover:text-red-800 font-semibold transition text-sm px-2 py-1 rounded"
-                >
-                  Excluir
-                </button>
+              <div className="actions">
+                <div className="data">{venda.data?.toDate ? venda.data.toDate().toLocaleString() : 'Data inválida'}</div>
+                <button onClick={() => handleExcluirVenda(venda)} disabled={submitting}>Excluir</button>
               </div>
             </li>
           ))}
