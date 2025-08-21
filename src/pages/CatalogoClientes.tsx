@@ -4,6 +4,7 @@ import { db } from "../services/firebase";
 import { collection, addDoc, Timestamp, doc, updateDoc, onSnapshot } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import "../styles/catalogoClientes.css";
+import { useAuth } from "../services/AuthContext";
 
 interface Produto {
   id: string;
@@ -13,7 +14,8 @@ interface Produto {
   unidade: string;
   categoria: string;
   quantidade: number;
-  imagemURL?: string;
+  imagemURL?: string;      // para compatibilidade antiga
+  imagemBase64?: string;   // nova propriedade Base64
 }
 
 interface ItemCarrinho extends Produto {
@@ -22,6 +24,7 @@ interface ItemCarrinho extends Produto {
 
 const CatalogoClientes: React.FC = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [carrinho, setCarrinho] = useState<ItemCarrinho[]>([]);
   const [clienteNome, setClienteNome] = useState(localStorage.getItem("clienteNome") || "");
@@ -53,6 +56,7 @@ const CatalogoClientes: React.FC = () => {
           categoria: data.categoria || "Sem Categoria",
           quantidade: estoqueNum,
           imagemURL: data.imagemURL || "",
+          imagemBase64: data.imagemBase64 || "", // ✅ Base64
         });
 
         categoriasSet.add(data.categoria || "Sem Categoria");
@@ -61,7 +65,6 @@ const CatalogoClientes: React.FC = () => {
       setProdutos(lista);
       setCategorias(["Todas", ...Array.from(categoriasSet)]);
 
-      // Ajusta quantidade no carrinho se estoque mudou
       setCarrinho(prev => prev.map(item => {
         const prodAtual = lista.find(p => p.id === item.id);
         if (!prodAtual) return item;
@@ -70,7 +73,6 @@ const CatalogoClientes: React.FC = () => {
       }));
     });
 
-    // Carrega carrinho do localStorage
     const savedCart = localStorage.getItem("carrinho");
     if (savedCart) {
       const parsedCart: ItemCarrinho[] = JSON.parse(savedCart);
@@ -86,7 +88,6 @@ const CatalogoClientes: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // Adiciona produto ao carrinho
   const adicionarCarrinho = async (produto: Produto, quantidade: number) => {
     const prodAtual = produtos.find(p => p.id === produto.id);
     if (!prodAtual) return alert("Produto não encontrado.");
@@ -125,7 +126,6 @@ const CatalogoClientes: React.FC = () => {
     }
   };
 
-  // Remove item do carrinho
   const removerItem = async (produtoId: string) => {
     const item = carrinho.find(i => i.id === produtoId);
     if (!item) return;
@@ -149,7 +149,6 @@ const CatalogoClientes: React.FC = () => {
     0
   );
 
-  // Envia pedido e registra como vendas com valorCompra correto
   const enviarPedido = async () => {
     if (!clienteNome || !telefone || carrinho.length === 0) {
       setMensagem("Preencha seu nome, telefone e adicione produtos ao carrinho.");
@@ -161,7 +160,6 @@ const CatalogoClientes: React.FC = () => {
       .join("\n")}\n\nTotal: R$ ${totalCarrinho.toFixed(2)}`;
 
     try {
-      // Registra pedido
       await addDoc(collection(db, "pedidos"), {
         clienteNome,
         telefone,
@@ -178,7 +176,6 @@ const CatalogoClientes: React.FC = () => {
         criadoEm: Timestamp.now(),
       });
 
-      // Registra cada item como venda COM VALOR DE COMPRA ORIGINAL FORÇANDO NUMERO
       for (const item of carrinho) {
         const produtoOriginal = produtos.find(p => p.id === item.id);
         const valorCompra = Number(produtoOriginal?.valorCompra || 0);
@@ -195,7 +192,6 @@ const CatalogoClientes: React.FC = () => {
         });
       }
 
-      // Abre WhatsApp
       const telefoneAdmin = "5512982853312";
       window.open(
         `https://api.whatsapp.com/send?phone=${telefoneAdmin}&text=${encodeURIComponent(texto)}`,
@@ -220,7 +216,15 @@ const CatalogoClientes: React.FC = () => {
     <div className="catalogo-container">
       <div className="catalogo-header">
         <h1>Catálogo de Produtos</h1>
-        <button className="btn-voltar" onClick={() => navigate("/catalogo-publico")}>Voltar</button>
+        <button
+          className="btn-voltar"
+          onClick={async () => {
+            await logout();
+            navigate("/login");
+          }}
+        >
+          Voltar
+        </button>
       </div>
 
       {mensagem && <div className="mensagem">{mensagem}</div>}
@@ -245,7 +249,15 @@ const CatalogoClientes: React.FC = () => {
 
             return (
               <div key={produto.id} className="card-produto">
-                {produto.imagemURL && <img src={produto.imagemURL} alt={produto.nome} />}
+                {/* ✅ Exibição da imagem Base64 */}
+                {produto.imagemBase64 ? (
+                  <img src={produto.imagemBase64} alt={produto.nome} className="produto-imagem" />
+                ) : produto.imagemURL ? (
+                  <img src={produto.imagemURL} alt={produto.nome} className="produto-imagem" />
+                ) : (
+                  <div className="produto-sem-imagem">Sem Imagem</div>
+                )}
+                
                 <h3>{produto.nome}</h3>
                 <p>R$ {produto.valorVenda.toFixed(2)}</p>
                 <p className="estoque">{disponivel ? `Disponível: ${produto.quantidade}` : "Esgotado"}</p>

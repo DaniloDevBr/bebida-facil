@@ -1,6 +1,8 @@
+// src/pages/AddProduct.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../services/firebase';
+import '../styles/AddProduct.css';
 import { collection, addDoc } from 'firebase/firestore';
 
 const categoriasFixas = ['Cerveja', 'Energético', 'Destilado', 'Refrigerante', 'Porções', 'Outros'];
@@ -14,7 +16,7 @@ interface ProdutoForm {
   valorVenda: number | '';
 }
 
-const AddProduct = () => {
+const AddProduct: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState<ProdutoForm>({
     nome: '',
@@ -24,7 +26,20 @@ const AddProduct = () => {
     valorCompra: '',
     valorVenda: '',
   });
+  const [imagemFile, setImagemFile] = useState<File | null>(null);
+  const [previewURL, setPreviewURL] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Atualiza preview ao selecionar imagem
+  const handleImagemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImagemFile(e.target.files[0]);
+      setPreviewURL(URL.createObjectURL(e.target.files[0]));
+    } else {
+      setImagemFile(null);
+      setPreviewURL(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,13 +48,26 @@ const AddProduct = () => {
       return;
     }
     setSubmitting(true);
+
     try {
+      let imagemBase64 = '';
+      if (imagemFile) {
+        const reader = new FileReader();
+        imagemBase64 = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
+          reader.readAsDataURL(imagemFile);
+        });
+      }
+
       await addDoc(collection(db, 'produtos'), {
         ...form,
         quantidade: Number(form.quantidade),
         valorCompra: Number(form.valorCompra),
         valorVenda: Number(form.valorVenda),
+        imagemBase64, // salva a imagem em Base64
       });
+
       alert('Produto adicionado com sucesso!');
       navigate('/produtos');
     } catch (error) {
@@ -51,14 +79,14 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto bg-white rounded-2xl shadow-md">
-      <div className="flex justify-between items-center mb-6">
-      <button
-        onClick={() => navigate('/')}
-        className="mb-6 px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold transition"
-      >
-        ← Voltar ao Menu Inicial
-      </button>
+    <div className="add-product-container p-6">
+      <div className="add-product-header mb-6">
+        <button
+          onClick={() => navigate('/')}
+          className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold transition"
+        >
+          ← Voltar ao Menu Inicial
+        </button>
         <button
           onClick={() => navigate('/produtos')}
           className="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition"
@@ -67,24 +95,23 @@ const AddProduct = () => {
         </button>
       </div>
 
-      <h2 className="text-3xl font-bold text-indigo-700 mb-6">Adicionar Produto</h2>
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <h2 className="add-product-title">Adicionar Produto</h2>
+
+      <form onSubmit={handleSubmit} className="add-product-form">
         <input
           type="text"
           placeholder="Nome do produto"
           value={form.nome}
           onChange={e => setForm({ ...form, nome: e.target.value })}
-          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none placeholder-gray-400"
-          required
           disabled={submitting}
+          required
         />
 
         <select
           value={form.categoria}
           onChange={e => setForm({ ...form, categoria: e.target.value })}
-          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
-          required
           disabled={submitting}
+          required
         >
           <option value="">Selecione a categoria</option>
           {categoriasFixas.map(cat => (
@@ -97,10 +124,9 @@ const AddProduct = () => {
           placeholder="Quantidade"
           value={form.quantidade}
           onChange={e => setForm({ ...form, quantidade: e.target.value === '' ? '' : Number(e.target.value) })}
-          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none placeholder-gray-400"
           min={0}
-          required
           disabled={submitting}
+          required
         />
 
         <input
@@ -108,9 +134,8 @@ const AddProduct = () => {
           placeholder="Unidade (ex: cx, und)"
           value={form.unidade}
           onChange={e => setForm({ ...form, unidade: e.target.value })}
-          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none placeholder-gray-400"
-          required
           disabled={submitting}
+          required
         />
 
         <input
@@ -118,11 +143,10 @@ const AddProduct = () => {
           placeholder="Valor de Compra"
           value={form.valorCompra}
           onChange={e => setForm({ ...form, valorCompra: e.target.value === '' ? '' : Number(e.target.value) })}
-          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none placeholder-gray-400"
           min={0}
           step={0.01}
-          required
           disabled={submitting}
+          required
         />
 
         <input
@@ -130,17 +154,33 @@ const AddProduct = () => {
           placeholder="Valor de Venda"
           value={form.valorVenda}
           onChange={e => setForm({ ...form, valorVenda: e.target.value === '' ? '' : Number(e.target.value) })}
-          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none placeholder-gray-400"
           min={0}
           step={0.01}
-          required
           disabled={submitting}
+          required
         />
+
+        {/* Upload de imagem */}
+        <div>
+          <label>Imagem do Produto</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImagemChange}
+            disabled={submitting}
+          />
+          {previewURL && (
+            <img
+              src={previewURL}
+              alt="Preview"
+              className="image-preview"
+            />
+          )}
+        </div>
 
         <button
           type="submit"
           disabled={submitting}
-          className="w-full py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition"
         >
           {submitting ? 'Salvando...' : 'Salvar Produto'}
         </button>

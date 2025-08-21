@@ -1,3 +1,4 @@
+// src/pages/Products.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../services/firebase';
@@ -12,6 +13,8 @@ interface Produto {
   unidade: string;
   valorCompra: number;
   valorVenda: number;
+  imagemURL?: string;      // compatibilidade antiga
+  imagemBase64?: string;   // nova propriedade Base64
 }
 
 const Products = () => {
@@ -35,6 +38,8 @@ const Products = () => {
           unidade: data.unidade || 'un',
           valorCompra: Number(data.valorCompra) || 0,
           valorVenda: Number(data.valorVenda) || 0,
+          imagemURL: data.imagemURL || '',
+          imagemBase64: data.imagemBase64 || '',
         };
       });
       setProdutos(lista);
@@ -104,6 +109,16 @@ const Products = () => {
                 .filter(p => p.categoria === categoria)
                 .map(produto => (
                   <li key={produto.id} className="card-item">
+                    <div className="card-img-container">
+                      {produto.imagemBase64 ? (
+                        <img src={produto.imagemBase64} alt={produto.nome} className="card-img" />
+                      ) : produto.imagemURL ? (
+                        <img src={produto.imagemURL} alt={produto.nome} className="card-img" />
+                      ) : (
+                        <div className="card-no-img">Sem Imagem</div>
+                      )}
+                    </div>
+
                     <div>
                       <h3 className="card-title">{produto.nome}</h3>
                       <p className="card-quantity">

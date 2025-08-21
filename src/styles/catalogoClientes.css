@@ -10,6 +10,43 @@
   flex: 1;
 }
 
+.card-produto {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.card-produto img,
+.produto-imagem {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.produto-sem-imagem {
+  width: 100%;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  color: #999;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.estoque {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
 .carrinho-lateral {
   width: 300px;
   background: #fff;
@@ -19,6 +56,60 @@
   position: sticky;
   top: 20px;
   height: fit-content;
+}
+
+.carrinho-lateral ul {
+  list-style: none;
+  padding: 0;
+}
+
+.carrinho-lateral li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.carrinho-lateral .remover {
+  background: #ff4d4d;
+  color: #fff;
+  border: none;
+  border-radius: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.total {
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+.checkout {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checkout input,
+.checkout select,
+.checkout button {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+}
+
+.enviar-pedido {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.enviar-pedido:hover {
+  background: #45a049;
 }
 
 @media (max-width: 1024px) {

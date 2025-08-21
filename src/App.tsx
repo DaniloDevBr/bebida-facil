@@ -13,6 +13,7 @@ import Notificacoes from "./pages/Notificacoes";
 import PedidosCliente from "./pages/PedidosCliente";
 import AdminPedidos from "./pages/AdminPedidos";
 import CatalogoClientes from "./pages/CatalogoClientes";
+import CatalogoPublico from "./pages/CatalogoPublico"; // ✅ catálogo público
 import { AuthProvider, useAuth } from "./services/AuthContext";
 import { AuthRoleProvider, useAuthRole } from "./services/AuthRoleContext";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -23,7 +24,7 @@ const RoleProtectedRoute = ({
   children,
   allowedRoles,
 }: {
-  children: React.ReactElement;
+  children: React.ReactNode; // ✅ agora aceita múltiplos filhos
   allowedRoles: string[];
 }) => {
   const { user, loading } = useAuth();
@@ -36,7 +37,7 @@ const RoleProtectedRoute = ({
       </div>
     );
 
-  if (!user) return <Navigate to="/loginclientes" replace />;
+  if (!user) return <Navigate to="/login" replace />;
 
   const userRole = role?.toLowerCase();
   if (!userRole || !allowedRoles.map(r => r.toLowerCase()).includes(userRole)) {
@@ -48,7 +49,7 @@ const RoleProtectedRoute = ({
     );
   }
 
-  return children;
+  return <>{children}</>; // ✅ envolver em fragmento
 };
 
 // 🔹 Redirecionamento raiz baseado na role
@@ -63,17 +64,17 @@ const HomeRedirect = () => {
       </div>
     );
 
-  if (!user) return <Navigate to="/loginclientes" replace />;
+  if (!user) return <Navigate to="/login" replace />;
 
   const userRole = role?.toLowerCase();
   if (userRole === "admin") return <Navigate to="/dashboard" replace />;
   if (userRole === "cliente") return <Navigate to="/catalogo" replace />;
 
-  return <Navigate to="/loginclientes" replace />;
+  return <Navigate to="/login" replace />;
 };
 
 // 🔹 Rota pública protegida (bloqueia catálogo público se logado)
-const PublicOnlyRoute = ({ children }: { children: React.ReactElement }) => {
+const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const { role, loading: loadingRole } = useAuthRole();
 
@@ -90,7 +91,7 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactElement }) => {
     if (userRole === "cliente") return <Navigate to="/catalogo" replace />;
   }
 
-  return children;
+  return <>{children}</>; // ✅ envolver em fragmento
 };
 
 function App() {
@@ -109,7 +110,7 @@ function App() {
               path="/catalogo-publico"
               element={
                 <PublicOnlyRoute>
-                  <CatalogoClientes />
+                  <CatalogoPublico /> {/* ✅ botão "Voltar" já aponta para /login */}
                 </PublicOnlyRoute>
               }
             />
@@ -222,7 +223,7 @@ function App() {
             />
 
             {/* Redirecionamento wildcard */}
-            <Route path="*" element={<Navigate to="/loginclientes" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Router>
       </AuthRoleProvider>
