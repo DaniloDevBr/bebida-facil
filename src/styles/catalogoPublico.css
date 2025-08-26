@@ -6,18 +6,21 @@
   background-color: #f9f9f9; /* leve diferença de fundo */
 }
 
+/* Cabeçalho */
 .catalogo-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
-  border-bottom: 2px solid #00aaff; /* destaca que é público */
+  border-bottom: 2px solid #00aaff;
   padding-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .catalogo-header h1 {
   font-size: 2rem;
-  color: #007bff; /* azul para diferenciar */
+  color: #007bff;
 }
 
 .btn-voltar {
@@ -34,6 +37,7 @@
   background-color: #0056b3;
 }
 
+/* Filtros de categoria */
 .menu-categorias {
   margin-bottom: 20px;
   display: flex;
@@ -42,7 +46,7 @@
 }
 
 .btn-categoria {
-  background-color: #e0f0ff; /* azul claro de fundo */
+  background-color: #e0f0ff;
   border: none;
   padding: 6px 12px;
   border-radius: 6px;
@@ -58,11 +62,14 @@
   color: #fff;
 }
 
+/* Layout principal */
 .catalogo-content {
   display: flex;
   gap: 20px;
+  align-items: flex-start;
 }
 
+/* Grid de produtos */
 .produtos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -95,7 +102,7 @@
 .card-produto h3 {
   font-size: 1.1rem;
   margin-bottom: 6px;
-  color: #007bff; /* título azul */
+  color: #007bff;
 }
 
 .card-produto p {
@@ -109,11 +116,11 @@
   font-weight: 500;
 }
 
+/* Inputs e botões */
 input[type="number"] {
   width: 60px;
   padding: 4px;
-  margin-top: 6px;
-  margin-bottom: 6px;
+  margin: 6px 0;
   border-radius: 5px;
   border: 1px solid #ccc;
   text-align: center;
@@ -128,6 +135,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* Carrinho lateral */
 .carrinho-lateral {
   width: 300px;
   background-color: #e6f7ff;
@@ -136,6 +144,7 @@ button:disabled {
   position: sticky;
   top: 20px;
   height: fit-content;
+  flex-shrink: 0;
 }
 
 .carrinho-lateral h2 {
@@ -152,8 +161,10 @@ button:disabled {
 .carrinho-lateral li {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 6px;
   color: #333;
+  gap: 5px;
 }
 
 .carrinho-lateral .remover {
@@ -204,6 +215,7 @@ button:disabled {
   font-weight: 500;
 }
 
+/* Responsividade */
 @media (max-width: 1024px) {
   .catalogo-content {
     flex-direction: column;
@@ -213,5 +225,47 @@ button:disabled {
     position: relative;
     top: 0;
     margin-top: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .catalogo-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  .produtos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+  }
+  .card-produto img {
+    height: 130px;
+  }
+}
+
+@media (max-width: 480px) {
+  .catalogo-publico-container {
+    padding: 10px;
+  }
+  .catalogo-header h1 {
+    font-size: 1.5rem;
+  }
+  .produtos-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .card-produto {
+    padding: 10px;
+  }
+  .card-produto img {
+    height: 110px;
+  }
+  .carrinho-lateral {
+    padding: 10px;
+  }
+  .checkout input,
+  .checkout select,
+  .enviar-pedido {
+    font-size: 0.9rem;
+    padding: 6px;
   }
 }

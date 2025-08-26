@@ -5,6 +5,7 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  box-sizing: border-box;
 }
 
 .register-box {
@@ -14,6 +15,7 @@
   max-width: 400px;
   width: 100%;
   box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  box-sizing: border-box;
 }
 
 .register-title {
@@ -84,4 +86,45 @@
 
 .register-link:hover {
   color: #312e81;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .register-box {
+    padding: 1.5rem;
+    max-width: 350px;
+  }
+
+  .register-title {
+    font-size: 1.75rem;
+  }
+
+  .register-input,
+  .register-select,
+  .register-button {
+    font-size: 0.95rem;
+    padding: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-box {
+    padding: 1rem;
+    width: 100%;
+  }
+
+  .register-title {
+    font-size: 1.5rem;
+  }
+
+  .register-input,
+  .register-select,
+  .register-button {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+
+  .register-text {
+    font-size: 0.85rem;
+  }
 }

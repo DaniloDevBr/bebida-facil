@@ -7,6 +7,7 @@
   background: linear-gradient(135deg, #4b1d1d 0%, #7b2e2e 50%, #f7f0eb 100%);
   font-family: 'Poppins', sans-serif;
   color: #fff;
+  box-sizing: border-box;
 }
 
 /* Header e ações */
@@ -23,8 +24,10 @@
   font-size: 2rem;
   font-weight: 900;
   color: #fff;
+  text-align: center;
 }
 
+/* Botões principais */
 .btn-back,
 .btn-add {
   background-color: #7b1d1d;
@@ -81,6 +84,7 @@
   flex-direction: column;
   justify-content: space-between;
   transition: transform 0.2s ease;
+  color: #000; /* Texto dentro do card */
 }
 
 .card-item:hover {
@@ -97,7 +101,7 @@
 .card-quantity,
 .card-values {
   font-size: 0.95rem;
-  color: #333;
+  color: #4b1d1d;
   margin-bottom: 0.5rem;
 }
 
@@ -149,35 +153,59 @@
 }
 
 /* Responsividade */
-@media (max-width: 600px) {
+@media (max-width: 1024px) {
+  .cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .page-title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 768px) {
   .header-actions {
     flex-direction: column;
     align-items: stretch;
+    text-align: center;
   }
 
   .btn-back,
   .btn-add {
     width: 100%;
   }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* Menu legível */
-.cards-grid .card-item {
-  color: #000; /* Texto dentro dos cards */
-}
+@media (max-width: 480px) {
+  .content {
+    padding: 1rem;
+  }
 
-.card-quantity,
-.card-values {
-  color: #4b1d1d;
-}
+  .card-item {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
 
-.categoria-title {
-  color: #fff; /* Título da categoria */
-}
+  .card-title {
+    font-size: 1rem;
+  }
 
-.btn-back,
-.btn-add,
-.btn-delete,
-.btn-add-stock {
-  color: #fff;
+  .card-quantity,
+  .card-values {
+    font-size: 0.85rem;
+  }
+
+  .btn-delete,
+  .btn-add-stock {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
 }

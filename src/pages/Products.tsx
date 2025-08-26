@@ -111,11 +111,46 @@ const Products = () => {
                   <li key={produto.id} className="card-item">
                     <div className="card-img-container">
                       {produto.imagemBase64 ? (
-                        <img src={produto.imagemBase64} alt={produto.nome} className="card-img" />
+                        <img
+                          src={produto.imagemBase64}
+                          alt={produto.nome}
+                          className="card-img"
+                          style={{
+                            width: "150px",
+                            height: "150px",
+                            objectFit: "contain",
+                            backgroundColor: "#f5f5f5",
+                            borderRadius: "8px"
+                          }}
+                        />
                       ) : produto.imagemURL ? (
-                        <img src={produto.imagemURL} alt={produto.nome} className="card-img" />
+                        <img
+                          src={produto.imagemURL}
+                          alt={produto.nome}
+                          className="card-img"
+                          style={{
+                            width: "150px",
+                            height: "150px",
+                            objectFit: "contain",
+                            backgroundColor: "#f5f5f5",
+                            borderRadius: "8px"
+                          }}
+                        />
                       ) : (
-                        <div className="card-no-img">Sem Imagem</div>
+                        <div
+                          className="card-no-img"
+                          style={{
+                            width: "150px",
+                            height: "150px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#eee",
+                            borderRadius: "8px"
+                          }}
+                        >
+                          Sem Imagem
+                        </div>
                       )}
                     </div>
 

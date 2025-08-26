@@ -16,6 +16,45 @@ interface ProdutoForm {
   valorVenda: number | '';
 }
 
+// 🔹 Função para redimensionar imagem para 150x150 (crop central, sem esticar)
+const resizeImage = (file: File, maxWidth = 150, maxHeight = 150): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject("Erro ao processar imagem.");
+
+        canvas.width = maxWidth;
+        canvas.height = maxHeight;
+
+        // calcula escala proporcional
+        const scale = Math.max(maxWidth / img.width, maxHeight / img.height);
+        const newWidth = img.width * scale;
+        const newHeight = img.height * scale;
+
+        // centraliza cortando excesso
+        const offsetX = (maxWidth - newWidth) / 2;
+        const offsetY = (maxHeight - newHeight) / 2;
+
+        ctx.drawImage(img, offsetX, offsetY, newWidth, newHeight);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.9));
+      };
+
+      img.onerror = (err) => reject(err);
+    };
+
+    reader.onerror = (err) => reject(err);
+  });
+};
+
 const AddProduct: React.FC = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState<ProdutoForm>({
@@ -30,11 +69,17 @@ const AddProduct: React.FC = () => {
   const [previewURL, setPreviewURL] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Atualiza preview ao selecionar imagem
-  const handleImagemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Atualiza preview redimensionando automaticamente
+  const handleImagemChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setImagemFile(e.target.files[0]);
-      setPreviewURL(URL.createObjectURL(e.target.files[0]));
+      const file = e.target.files[0];
+      try {
+        const resizedBase64 = await resizeImage(file, 150, 150);
+        setImagemFile(file);
+        setPreviewURL(resizedBase64);
+      } catch (error) {
+        console.error("Erro ao redimensionar imagem:", error);
+      }
     } else {
       setImagemFile(null);
       setPreviewURL(null);
@@ -52,12 +97,7 @@ const AddProduct: React.FC = () => {
     try {
       let imagemBase64 = '';
       if (imagemFile) {
-        const reader = new FileReader();
-        imagemBase64 = await new Promise<string>((resolve, reject) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = error => reject(error);
-          reader.readAsDataURL(imagemFile);
-        });
+        imagemBase64 = await resizeImage(imagemFile, 150, 150); // garante salvar em 150x150
       }
 
       await addDoc(collection(db, 'produtos'), {
@@ -65,7 +105,7 @@ const AddProduct: React.FC = () => {
         quantidade: Number(form.quantidade),
         valorCompra: Number(form.valorCompra),
         valorVenda: Number(form.valorVenda),
-        imagemBase64, // salva a imagem em Base64
+        imagemBase64,
       });
 
       alert('Produto adicionado com sucesso!');
@@ -173,6 +213,9 @@ const AddProduct: React.FC = () => {
             <img
               src={previewURL}
               alt="Preview"
+              width="150"
+              height="150"
+              style={{ objectFit: "cover", borderRadius: "8px" }}
               className="image-preview"
             />
           )}

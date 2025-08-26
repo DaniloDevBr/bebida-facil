@@ -142,7 +142,10 @@ const Relatorios = () => {
 
   return (
     <div className="relatorios-container">
-      <button onClick={() => navigate('/')} className="back-btn">← Voltar ao Menu Inicial</button>
+      {/* Botão de voltar ao menu */}
+      <button onClick={() => navigate('/')} className="back-btn">
+        ← Voltar ao Menu Inicial
+      </button>
 
       <h2>Relatórios de Vendas</h2>
 

@@ -103,7 +103,6 @@ export default function Dashboard() {
     }
   };
 
-  // Cálculos em tempo real
   const totalProdutos = produtos.reduce((acc, p) => acc + (Number(p.quantidade) || 0), 0);
   const totalVendas = vendas.reduce((acc, v) => acc + (Number(v.quantidade) * Number(v.valorVenda)), 0);
   const totalLucro = vendas.reduce(
@@ -127,31 +126,44 @@ export default function Dashboard() {
     }
   };
 
+  // Fechar sidebar ao clicar em link (mobile)
+  const handleLinkClick = () => {
+    if (sidebarOpen) setSidebarOpen(false);
+  };
+
   return (
     <div className="dashboard-container">
+      {/* Botão fixo para abrir sidebar */}
+      <button className="menu-btn" onClick={() => setSidebarOpen(true)}>
+        <FiMenu />
+      </button>
+
+      {/* Overlay para mobile */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <h2>Meu Dashboard</h2>
-          <button className="menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            {sidebarOpen ? <FiX /> : <FiMenu />}
+          <button className="menu-btn" onClick={() => setSidebarOpen(false)}>
+            <FiX />
           </button>
         </div>
 
         <nav className="menu">
-          <Link to="/">
+          <Link to="/" onClick={handleLinkClick}>
             <FiBarChart2 /> Visão Geral
           </Link>
-          <Link to="/produtos">
+          <Link to="/produtos" onClick={handleLinkClick}>
             <FiBox /> Produtos
           </Link>
-          <Link to="/vendas">
+          <Link to="/vendas" onClick={handleLinkClick}>
             <FiBarChart2 /> Vendas
           </Link>
-          <Link to="/relatorios">
+          <Link to="/relatorios" onClick={handleLinkClick}>
             <FiBarChart2 /> Relatórios
           </Link>
-          <Link to="/notificacoes" onClick={marcarTodasComoLidas}>
+          <Link to="/notificacoes" onClick={() => { marcarTodasComoLidas(); handleLinkClick(); }}>
             <FiBell /> Notificações
             {notificacoesNaoLidas > 0 && <span className="badge">{notificacoesNaoLidas}</span>}
           </Link>

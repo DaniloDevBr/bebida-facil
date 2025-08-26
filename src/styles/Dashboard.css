@@ -6,6 +6,7 @@
   position: relative;
   font-family: 'Inter', sans-serif;
   color: #1f2937; /* Texto escuro global */
+  overflow-x: hidden;
 }
 
 /* Sidebar */
@@ -18,7 +19,8 @@
   justify-content: space-between;
   transition: transform 0.3s ease, background 0.3s ease;
   backdrop-filter: blur(10px);
-  color: #1f2937; /* Texto escuro */
+  color: #1f2937;
+  z-index: 1001;
 }
 
 .sidebar-header {
@@ -29,14 +31,17 @@
   border-bottom: 1px solid #d1d5db;
 }
 
+/* Botão de menu fixo no topo para mobile */
 .menu-btn {
   background: none;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
   color: #374151;
+  z-index: 1100;
 }
 
+/* Menu interno */
 .menu {
   display: flex;
   flex-direction: column;
@@ -45,7 +50,7 @@
 
 .menu a {
   text-decoration: none;
-  color: #1f2937; /* Texto escuro */
+  color: #1f2937;
   margin: 12px 0;
   display: flex;
   align-items: center;
@@ -86,7 +91,7 @@
 
 .logout button {
   width: 100%;
-  background: #b2392e; /* Vinho escuro */
+  background: #b2392e;
   color: #fff;
   border: none;
   padding: 12px 0;
@@ -112,7 +117,8 @@
 .content {
   flex: 1;
   padding: 40px 30px;
-  color: #1f2937; /* Texto escuro */
+  color: #1f2937;
+  transition: margin-left 0.3s ease;
 }
 
 /* Cards do dashboard */
@@ -124,14 +130,14 @@
 }
 
 .card {
-  background: #ffffffcc; /* Fundo branco suave */
+  background: #ffffffcc;
   padding: 20px 25px;
   border-radius: 12px;
   flex: 1;
   min-width: 220px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  color: #1f2937; /* Texto escuro */
+  color: #1f2937;
 }
 
 .card:hover {
@@ -145,17 +151,17 @@
   justify-content: space-between;
   margin-bottom: 15px;
   font-size: 18px;
-  color: #4b5563; /* Texto escuro suave */
+  color: #4b5563;
 }
 
 /* Tabela */
 .table-container {
-  background: #ffffffcc; /* Fundo branco suave */
+  background: #ffffffcc;
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.06);
   overflow-x: auto;
-  color: #1f2937; /* Texto escuro */
+  color: #1f2937;
 }
 
 table {
@@ -168,7 +174,7 @@ th, td {
   padding: 12px 15px;
   border-bottom: 1px solid #e5e7eb;
   text-align: left;
-  color: #1f2937; /* Texto escuro */
+  color: #1f2937;
 }
 
 th {
@@ -183,8 +189,11 @@ th {
   left: 0;
   padding: 10px 20px;
   font-size: 14px;
-  background: #f5ebeb; /* Vinho suave */
+  background: #f5ebeb;
   color: #374151;
+  width: 100%;
+  text-align: center;
+  z-index: 900;
 }
 
 /* Direitos Reservados */
@@ -196,21 +205,48 @@ th {
   color: #6b7280;
 }
 
-/* Responsividade */
+/* Overlay para mobile quando sidebar aberta */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Responsividade maior */
+@media (max-width: 1280px) {
+  .cards {
+    gap: 15px;
+  }
+  .card {
+    padding: 18px 20px;
+  }
+}
+
 @media (max-width: 1024px) {
   .cards {
     flex-direction: column;
   }
 }
 
-@media (max-width: 768px) {
+/* Mobile: Menu desliza a partir de 390px */
+@media (max-width: 480px) {
   .sidebar {
     position: fixed;
     left: 0;
     top: 0;
     height: 100%;
     transform: translateX(-100%);
-    z-index: 1000;
+    z-index: 1001;
+    width: 220px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
   }
 
   .sidebar.open {
@@ -222,14 +258,47 @@ th {
     padding: 20px;
   }
 
-  .footer {
-    text-align: center;
-    width: 100%;
+  /* Botão de menu fixo no topo esquerdo */
+  .menu-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    display: inline-block;
+    background: #ffffffcc;
+    border-radius: 8px;
+    padding: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
 
   .footer-reserved {
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
+  }
+
+  /* Cards e tabela adaptativos */
+  .card {
+    min-width: 100%;
+    padding: 15px;
+  }
+
+  .table-container {
+    padding: 15px;
+  }
+
+  table th,
+  table td {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .logout button {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .menu a {
+    font-size: 14px;
+    padding: 8px 10px;
   }
 }

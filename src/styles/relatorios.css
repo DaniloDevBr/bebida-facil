@@ -1,11 +1,12 @@
 .relatorios-container {
-  max-width: 5xl;
+  max-width: 1200px; /* ajustado de '5xl' para pixels */
   margin: 2rem auto;
   padding: 1.5rem;
   background: #fff;
   border-radius: 1rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
 }
 
 .back-btn {
@@ -104,4 +105,42 @@ h2 {
 .lista-vendas tr:hover {
   background: #eef2ff;
   transition: 0.2s;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .relatorios-container {
+    padding: 1rem;
+  }
+  .filtro-datas {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .filtro-datas label {
+    width: 100%;
+  }
+  .filtro-datas button {
+    width: 100%;
+  }
+  .lista-vendas table {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  h2 {
+    font-size: 1.5rem;
+  }
+  .filtro-datas input[type="date"] {
+    padding: 0.45rem;
+    font-size: 0.9rem;
+  }
+  .filtro-datas button {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .totais-gerais p {
+    font-size: 0.875rem;
+  }
 }

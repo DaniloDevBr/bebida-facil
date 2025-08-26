@@ -104,11 +104,11 @@ export default function PedidosCliente() {
     try {
       await addDoc(collection(db, 'pedidos'), {
         clienteId: user.uid,
+        clienteNome: user.displayName || 'Cliente', // ✅ Adicionado
         itens: carrinho.map(item => ({
-          produtoId: item.id,
           nome: item.nome,
           quantidade: item.quantidadeSelecionada,
-          valorUnitario: item.valorVenda,
+          preco: item.valorVenda,
         })),
         total: totalCarrinho,
         status: 'pendente',
