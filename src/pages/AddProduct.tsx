@@ -6,17 +6,18 @@ import '../styles/AddProduct.css';
 import { collection, addDoc } from 'firebase/firestore';
 
 const categoriasFixas = ['Cerveja', 'Energético', 'Destilado', 'Refrigerante', 'Porções', 'Outros'];
+const unidadesFixas = ['und', 'caixa', 'fardo', 'kg', 'g'];
 
 interface ProdutoForm {
   nome: string;
   categoria: string;
   quantidade: number | '';
   unidade: string;
-  valorCompra: number | '';
+  valorCusto: number | '';
   valorVenda: number | '';
 }
 
-// 🔹 Função para redimensionar imagem para 150x150 (crop central, sem esticar)
+// 🔹 Redimensiona mantendo proporção, sem cortar nem ampliar
 const resizeImage = (file: File, maxWidth = 150, maxHeight = 150): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -34,14 +35,15 @@ const resizeImage = (file: File, maxWidth = 150, maxHeight = 150): Promise<strin
         canvas.width = maxWidth;
         canvas.height = maxHeight;
 
-        // calcula escala proporcional
-        const scale = Math.max(maxWidth / img.width, maxHeight / img.height);
+        const scale = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
         const newWidth = img.width * scale;
         const newHeight = img.height * scale;
 
-        // centraliza cortando excesso
         const offsetX = (maxWidth - newWidth) / 2;
         const offsetY = (maxHeight - newHeight) / 2;
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, maxWidth, maxHeight);
 
         ctx.drawImage(img, offsetX, offsetY, newWidth, newHeight);
 
@@ -62,14 +64,13 @@ const AddProduct: React.FC = () => {
     categoria: '',
     quantidade: '',
     unidade: '',
-    valorCompra: '',
+    valorCusto: '',
     valorVenda: '',
   });
   const [imagemFile, setImagemFile] = useState<File | null>(null);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Atualiza preview redimensionando automaticamente
   const handleImagemChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -88,7 +89,7 @@ const AddProduct: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nome || !form.categoria) {
+    if (!form.nome || !form.categoria || !form.unidade) {
       alert('Preencha todos os campos obrigatórios.');
       return;
     }
@@ -97,13 +98,13 @@ const AddProduct: React.FC = () => {
     try {
       let imagemBase64 = '';
       if (imagemFile) {
-        imagemBase64 = await resizeImage(imagemFile, 150, 150); // garante salvar em 150x150
+        imagemBase64 = await resizeImage(imagemFile, 150, 150);
       }
 
       await addDoc(collection(db, 'produtos'), {
         ...form,
         quantidade: Number(form.quantidade),
-        valorCompra: Number(form.valorCompra),
+        valorCompra: Number(form.valorCusto),
         valorVenda: Number(form.valorVenda),
         imagemBase64,
       });
@@ -118,9 +119,21 @@ const AddProduct: React.FC = () => {
     }
   };
 
+  // 🔹 Estilo uniforme para todos os inputs e selects
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    fontSize: '1.2rem',
+    padding: '1rem',
+    minHeight: '50px',
+    borderRadius: '0.75rem',
+    border: '1px solid #e2e8f0',
+    outline: 'none',
+    boxSizing: 'border-box',
+  };
+
   return (
-    <div className="add-product-container p-6">
-      <div className="add-product-header mb-6">
+    <div className="add-product-container">
+      <div className="add-product-header">
         <button
           onClick={() => navigate('/')}
           className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold transition"
@@ -145,6 +158,7 @@ const AddProduct: React.FC = () => {
           onChange={e => setForm({ ...form, nome: e.target.value })}
           disabled={submitting}
           required
+          style={inputStyle}
         />
 
         <select
@@ -152,6 +166,7 @@ const AddProduct: React.FC = () => {
           onChange={e => setForm({ ...form, categoria: e.target.value })}
           disabled={submitting}
           required
+          style={inputStyle}
         >
           <option value="">Selecione a categoria</option>
           {categoriasFixas.map(cat => (
@@ -167,26 +182,32 @@ const AddProduct: React.FC = () => {
           min={0}
           disabled={submitting}
           required
+          style={inputStyle}
         />
 
-        <input
-          type="text"
-          placeholder="Unidade (ex: cx, und)"
+        <select
           value={form.unidade}
           onChange={e => setForm({ ...form, unidade: e.target.value })}
           disabled={submitting}
           required
-        />
+          style={inputStyle}
+        >
+          <option value="">Selecione a unidade</option>
+          {unidadesFixas.map(unidade => (
+            <option key={unidade} value={unidade}>{unidade}</option>
+          ))}
+        </select>
 
         <input
           type="number"
-          placeholder="Valor de Compra"
-          value={form.valorCompra}
-          onChange={e => setForm({ ...form, valorCompra: e.target.value === '' ? '' : Number(e.target.value) })}
+          placeholder="Valor de Custo"
+          value={form.valorCusto}
+          onChange={e => setForm({ ...form, valorCusto: e.target.value === '' ? '' : Number(e.target.value) })}
           min={0}
           step={0.01}
           disabled={submitting}
           required
+          style={inputStyle}
         />
 
         <input
@@ -198,6 +219,7 @@ const AddProduct: React.FC = () => {
           step={0.01}
           disabled={submitting}
           required
+          style={inputStyle}
         />
 
         {/* Upload de imagem */}
@@ -208,14 +230,12 @@ const AddProduct: React.FC = () => {
             accept="image/*"
             onChange={handleImagemChange}
             disabled={submitting}
+            style={{ marginTop: '0.5rem' }}
           />
           {previewURL && (
             <img
               src={previewURL}
               alt="Preview"
-              width="150"
-              height="150"
-              style={{ objectFit: "cover", borderRadius: "8px" }}
               className="image-preview"
             />
           )}
@@ -224,6 +244,7 @@ const AddProduct: React.FC = () => {
         <button
           type="submit"
           disabled={submitting}
+          style={{ fontSize: '1.15rem', padding: '1rem 2rem', marginTop: '1rem' }}
         >
           {submitting ? 'Salvando...' : 'Salvar Produto'}
         </button>

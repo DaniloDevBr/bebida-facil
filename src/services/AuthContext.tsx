@@ -12,6 +12,7 @@ import { doc, setDoc } from 'firebase/firestore';
 
 interface AuthContextType {
   user: User | null;
+  currentUser: User | null; // 🔥 adicionado para compatibilidade
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, role?: 'admin' | 'cliente') => Promise<void>;
@@ -37,7 +38,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const register = async (email: string, password: string, role: 'admin' | 'cliente' = 'cliente') => {
+  const register = async (
+    email: string,
+    password: string,
+    role: 'admin' | 'cliente' = 'cliente'
+  ) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
 
     await setDoc(doc(db, 'usuarios', cred.user.uid), {
@@ -56,7 +61,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, resetPassword }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        currentUser: user, // 🔥 compatibilidade com seu CatalogoClientes
+        loading,
+        login,
+        register,
+        logout,
+        resetPassword,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

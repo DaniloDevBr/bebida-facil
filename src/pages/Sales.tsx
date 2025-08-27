@@ -20,7 +20,7 @@ interface Produto {
   nome: string;
   quantidade: number;
   unidade: string;
-  valorCompra: number;
+  valorCusto: number;
   valorVenda: number;
 }
 
@@ -31,7 +31,7 @@ interface Venda {
   quantidade: number;
   unidade: string;
   data: Timestamp;
-  valorCompra: number;
+  valorCusto: number;
   valorVenda: number;
   margemLucro?: number; // opcional, será calculado se não existir
 }
@@ -70,7 +70,7 @@ const Sales = () => {
       const lista: Venda[] = [];
       querySnapshot.forEach((docSnap) => {
         const data = docSnap.data() as Omit<Venda, 'id'>;
-        const margemLucro = (data.valorVenda - data.valorCompra) * data.quantidade;
+        const margemLucro = (data.valorVenda - data.valorCusto) * data.quantidade;
         lista.push({ id: docSnap.id, ...data, margemLucro });
       });
       setVendas(lista);
@@ -107,7 +107,7 @@ const Sales = () => {
       const novaQuantidade = produto.quantidade - quantidadeVendida;
       await updateDoc(doc(db, 'produtos', produto.id), { quantidade: novaQuantidade });
 
-      const margemLucro = (produto.valorVenda - produto.valorCompra) * quantidadeVendida;
+      const margemLucro = (produto.valorVenda - produto.valorCusto) * quantidadeVendida;
 
       await addDoc(collection(db, 'vendas'), {
         produtoId: produto.id,
@@ -115,7 +115,7 @@ const Sales = () => {
         quantidade: quantidadeVendida,
         unidade: produto.unidade,
         data: Timestamp.now(),
-        valorCompra: produto.valorCompra,
+        valorCusto: produto.valorCusto,
         valorVenda: produto.valorVenda,
         margemLucro,
       });
@@ -212,7 +212,7 @@ const Sales = () => {
               <div className="info">
                 <strong>{venda.nome}</strong>
                 <p>Quantidade: <span className="font-semibold">{venda.quantidade} {venda.unidade}</span></p>
-                <p>Compra: R$ {venda.valorCompra?.toFixed(2) ?? '0.00'} / Venda: R$ {venda.valorVenda?.toFixed(2) ?? '0.00'}</p>
+                <p>Custo: R$ {venda.valorCusto?.toFixed(2) ?? '0.00'} / Venda: R$ {venda.valorVenda?.toFixed(2) ?? '0.00'}</p>
                 <p className={`lucro ${venda.margemLucro! >= 0 ? 'lucro-positivo' : 'lucro-negativo'}`}>
                   Lucro: R$ {(venda.margemLucro ?? 0).toFixed(2)}
                 </p>

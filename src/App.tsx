@@ -1,7 +1,6 @@
 // src/App.tsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
-import LoginClientes from "./pages/LoginClientes";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
@@ -9,11 +8,10 @@ import AddProduct from "./pages/AddProduct";
 import Sales from "./pages/Sales";
 import Relatorios from "./pages/Relatorios";
 import Estoque from "./pages/Estoque";
-import Notificacoes from "./pages/Notificacoes";
 import PedidosCliente from "./pages/PedidosCliente";
-import AdminPedidos from "./pages/AdminPedidos";
+import Notificacoes from "./pages/Notificacoes";
 import CatalogoClientes from "./pages/CatalogoClientes";
-import CatalogoPublico from "./pages/CatalogoPublico"; // ✅ catálogo público
+import CatalogoPublico from "./pages/CatalogoPublico";
 import { AuthProvider, useAuth } from "./services/AuthContext";
 import { AuthRoleProvider, useAuthRole } from "./services/AuthRoleContext";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -24,7 +22,7 @@ const RoleProtectedRoute = ({
   children,
   allowedRoles,
 }: {
-  children: React.ReactNode; // ✅ agora aceita múltiplos filhos
+  children: React.ReactNode;
   allowedRoles: string[];
 }) => {
   const { user, loading } = useAuth();
@@ -49,7 +47,7 @@ const RoleProtectedRoute = ({
     );
   }
 
-  return <>{children}</>; // ✅ envolver em fragmento
+  return <>{children}</>;
 };
 
 // 🔹 Redirecionamento raiz baseado na role
@@ -68,7 +66,7 @@ const HomeRedirect = () => {
 
   const userRole = role?.toLowerCase();
   if (userRole === "admin") return <Navigate to="/dashboard" replace />;
-  if (userRole === "cliente") return <Navigate to="/catalogo" replace />;
+  if (userRole === "cliente") return <Navigate to="/pedidos" replace />;
 
   return <Navigate to="/login" replace />;
 };
@@ -88,10 +86,10 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   if (user) {
     const userRole = role?.toLowerCase();
     if (userRole === "admin") return <Navigate to="/dashboard" replace />;
-    if (userRole === "cliente") return <Navigate to="/catalogo" replace />;
+    if (userRole === "cliente") return <Navigate to="/pedidos" replace />;
   }
 
-  return <>{children}</>; // ✅ envolver em fragmento
+  return <>{children}</>;
 };
 
 function App() {
@@ -102,7 +100,6 @@ function App() {
           <Routes>
             {/* Rotas públicas */}
             <Route path="/login" element={<Login />} />
-            <Route path="/loginclientes" element={<LoginClientes />} />
             <Route path="/register" element={<Register />} />
 
             {/* Catálogo público */}
@@ -110,7 +107,7 @@ function App() {
               path="/catalogo-publico"
               element={
                 <PublicOnlyRoute>
-                  <CatalogoPublico /> {/* ✅ botão "Voltar" já aponta para /login */}
+                  <CatalogoPublico />
                 </PublicOnlyRoute>
               }
             />
@@ -120,7 +117,7 @@ function App() {
 
             {/* Rotas privadas admins */}
             <Route
-              path="/dashboard"
+              path="/dashboard/*"
               element={
                 <RoleProtectedRoute allowedRoles={["admin"]}>
                   <ErrorBoundary>
@@ -189,16 +186,6 @@ function App() {
                 </RoleProtectedRoute>
               }
             />
-            <Route
-              path="/admin/pedidos"
-              element={
-                <RoleProtectedRoute allowedRoles={["admin"]}>
-                  <ErrorBoundary>
-                    <AdminPedidos />
-                  </ErrorBoundary>
-                </RoleProtectedRoute>
-              }
-            />
 
             {/* Rotas privadas clientes */}
             <Route
@@ -223,7 +210,7 @@ function App() {
             />
 
             {/* Redirecionamento wildcard */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
       </AuthRoleProvider>

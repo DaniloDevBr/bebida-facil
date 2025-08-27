@@ -1,10 +1,95 @@
+/* ===== Container geral ===== */
+.catalogo-container {
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
+  background: #f5f6fa;
+  min-height: 100vh;
+  color: #333;
+}
+
+/* ===== Header ===== */
+.catalogo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.catalogo-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.btn-voltar, .btn-meus-pedidos {
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #1e88e5;
+  color: #fff;
+}
+
+.btn-voltar:hover, .btn-meus-pedidos:hover {
+  background: #1565c0;
+  transform: translateY(-2px);
+}
+
+/* ===== Mensagens ===== */
+.mensagem {
+  background: #fff8e1;
+  border-left: 4px solid #ffca28;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* ===== Menu de categorias ===== */
+.menu-categorias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.btn-categoria {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-categoria.ativo,
+.btn-categoria:hover {
+  background: #1e88e5;
+  border-color: #1565c0;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* ===== Conteúdo principal ===== */
 .catalogo-content {
   display: flex;
-  gap: 20px;
+  gap: 25px;
   align-items: flex-start;
 }
 
-/* Grid de produtos */
+/* ===== Grid de produtos ===== */
 .produtos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -12,92 +97,155 @@
   flex: 1;
 }
 
+/* ===== Card produto ===== */
 .card-produto {
   background: #fff;
-  border: 1px solid #ddd;
   border-radius: 1rem;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: all 0.3s;
+  cursor: pointer;
 }
 
 .card-produto:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
 }
 
-.card-produto img,
-.produto-imagem {
+.produto-imagem,
+.card-produto img {
   width: 100%;
   max-width: 220px;
   height: 180px;
-  object-fit: cover;
   border-radius: 0.5rem;
+  object-fit: cover;
   margin-bottom: 0.5rem;
 }
 
 .produto-sem-imagem {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   max-width: 220px;
   height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f0f0f0;
+  background: #e0e0e0;
   color: #999;
   border-radius: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
+.card-produto h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.3rem 0;
+}
+
+.card-produto p {
+  margin: 0.2rem 0;
+  font-size: 0.95rem;
+}
+
 .estoque {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   margin-bottom: 0.5rem;
 }
 
-/* Carrinho lateral */
+.estoque.esgotado {
+  color: #e53935;
+  font-weight: 600;
+}
+
+/* Input quantidade */
+.card-produto input[type="number"] {
+  width: 60px;
+  padding: 0.3rem;
+  border-radius: 0.3rem;
+  border: 1px solid #ccc;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Botão adicionar */
+.card-produto button.btn-add-carrinho {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: #43a047;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.card-produto button.btn-add-carrinho:hover {
+  background: #388e3c;
+  transform: translateY(-2px);
+}
+
+.card-produto button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* ===== Carrinho lateral ===== */
 .carrinho-lateral {
-  width: 300px;
+  width: 320px;
   background: #fff;
-  border: 1px solid #ddd;
-  padding: 1rem;
   border-radius: 1rem;
+  padding: 1rem;
   position: sticky;
   top: 20px;
-  height: fit-content;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.carrinho-lateral h2 {
+  font-size: 1.3rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
 }
 
 .carrinho-lateral ul {
-  list-style: none;
   padding: 0;
   margin: 0;
+  list-style: none;
 }
 
 .carrinho-lateral li {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 0.95rem;
   margin-bottom: 0.5rem;
 }
 
 .carrinho-lateral .remover {
-  background: #ff4d4d;
+  background: #e53935;
   color: #fff;
   border: none;
   border-radius: 0.3rem;
   padding: 0.2rem 0.5rem;
-  cursor: pointer;
   font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.carrinho-lateral .remover:hover {
+  background: #c62828;
 }
 
 .total {
   font-weight: bold;
+  font-size: 1.1rem;
   margin-top: 1rem;
 }
 
+/* ===== Checkout ===== */
 .checkout {
   margin-top: 1rem;
   display: flex;
@@ -115,18 +263,34 @@
 }
 
 .enviar-pedido {
-  background: #4caf50;
+  background: #43a047;
   color: #fff;
   border: none;
   cursor: pointer;
-  transition: background 0.3s;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
 .enviar-pedido:hover {
-  background: #45a049;
+  background: #388e3c;
+  transform: translateY(-2px);
 }
 
-/* Responsividade */
+/* ===== Meus pedidos ===== */
+.meus-pedidos {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.meus-pedidos h2 {
+  margin-top: 0;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+/* ===== Responsividade ===== */
 @media (max-width: 1024px) {
   .catalogo-content {
     flex-direction: column;
@@ -150,22 +314,12 @@
 }
 
 @media (max-width: 480px) {
-  .catalogo-content {
-    gap: 10px;
-  }
   .produtos-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-  .card-produto {
-    padding: 0.8rem;
   }
   .card-produto img,
   .produto-sem-imagem {
     height: 120px;
-  }
-  .carrinho-lateral {
-    padding: 0.8rem;
   }
   .checkout input,
   .checkout select,

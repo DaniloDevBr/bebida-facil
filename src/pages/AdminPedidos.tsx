@@ -17,6 +17,7 @@ interface Pedido {
   status: string;
   total: number;
   criadoEm: any;
+  resumo?: string; // novo campo opcional
 }
 
 export default function AdminPedidos() {
@@ -34,7 +35,15 @@ export default function AdminPedidos() {
   }, []);
 
   const handleAtualizarStatus = async (pedido: Pedido, novoStatus: string) => {
-    await updateDoc(doc(db, 'pedidos', pedido.id), { status: novoStatus });
+    // gera resumo do pedido
+    const resumo = pedido.itens
+      .map(i => `${i.nome} x${i.qtd}`)
+      .join(', ');
+
+    await updateDoc(doc(db, 'pedidos', pedido.id), { 
+      status: novoStatus,
+      resumo // salva resumo junto com status
+    });
   };
 
   return (
@@ -58,6 +67,11 @@ export default function AdminPedidos() {
                 ))}
               </ul>
               <p>Total: R$ {p.total.toFixed(2)}</p>
+              {p.resumo && (
+                <p className="text-sm text-gray-600">
+                  <strong>Resumo:</strong> {p.resumo}
+                </p>
+              )}
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => handleAtualizarStatus(p, 'aceito')}

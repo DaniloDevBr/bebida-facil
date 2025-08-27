@@ -1,0 +1,39 @@
+.pedidos-container {
+  padding: 20px;
+}
+
+.pedidos-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.pedidos-container th, .pedidos-container td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.pedidos-container th {
+  background-color: #f4f4f4;
+  text-align: left;
+}
+
+.excluir-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.excluir-btn:hover {
+  background-color: #c0392b;
+}
+
+.paginacao {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

@@ -37,20 +37,38 @@ const Notificacoes: React.FC = () => {
           const venda = change.doc.data() as any;
           const data = venda.data?.toDate ? venda.data.toDate() : new Date();
 
-          // Monta resumo dos itens
-          const resumo = venda.nome && venda.quantidade ? `${venda.quantidade}x ${venda.nome}` : "";
+          // Se existir array de itens, monta resumo a partir dele
+          let resumo = "";
+          let itens: VendaItem[] = [];
+
+          if (Array.isArray(venda.itens) && venda.itens.length > 0) {
+            resumo = venda.itens.map((i: any) => `${i.quantidade}x ${i.nome}`).join(", ");
+            itens = venda.itens.map((i: any) => ({
+              nome: i.nome,
+              quantidade: i.quantidade,
+              valorVenda: i.valorVenda,
+            }));
+          } else if (venda.nome && venda.quantidade) {
+            // Formato antigo (um produto só)
+            resumo = `${venda.quantidade}x ${venda.nome}`;
+            itens = [
+              {
+                nome: venda.nome,
+                quantidade: venda.quantidade,
+                valorVenda: venda.valorVenda,
+              },
+            ];
+          }
 
           novasNotificacoes.push({
             id: change.doc.id,
-            titulo: `Venda registrada: ${venda.nome}`,
-            descricao: `Quantidade: ${venda.quantidade} / Valor: R$ ${venda.valorVenda?.toFixed(2) ?? "0.00"}`,
+            titulo: `Venda registrada`,
+            descricao: `Total: R$ ${venda.total?.toFixed(2) ?? "0.00"}`,
             resumo,
             lida: false,
             data: data.toLocaleString(),
             timestamp: data.getTime(),
-            itens: venda.nome
-              ? [{ nome: venda.nome, quantidade: venda.quantidade, valorVenda: venda.valorVenda }]
-              : [],
+            itens,
           });
         }
       });
@@ -93,7 +111,11 @@ const Notificacoes: React.FC = () => {
             <div className="notificacao-info">
               <h3>{n.titulo}</h3>
               <p>{n.descricao}</p>
-              {n.resumo && <p style={{ whiteSpace: "pre-line" }}><strong>{n.resumo}</strong></p>}
+              {n.resumo && (
+                <p style={{ whiteSpace: "pre-line" }}>
+                  <strong>{n.resumo}</strong>
+                </p>
+              )}
               <span className="notificacao-data">{n.data}</span>
 
               {/* Itens detalhados */}
