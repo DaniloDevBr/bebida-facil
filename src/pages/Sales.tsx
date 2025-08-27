@@ -1,3 +1,4 @@
+// src/pages/Sales.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/sales.css';
@@ -13,6 +14,8 @@ import {
   query,
   orderBy,
   limit,
+  onSnapshot,
+  getDoc,
 } from 'firebase/firestore';
 
 interface Produto {
@@ -33,7 +36,7 @@ interface Venda {
   data: Timestamp;
   valorCusto: number;
   valorVenda: number;
-  margemLucro?: number; // opcional, será calculado se não existir
+  margemLucro: number;
 }
 
 const Sales = () => {
@@ -47,13 +50,22 @@ const Sales = () => {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // 🔄 Buscar produtos
   const fetchProdutos = async () => {
     setLoading(true);
     try {
-      const querySnapshot = await getDocs(collection(db, 'produtos'));
+      const snapshot = await getDocs(collection(db, 'produtos'));
       const lista: Produto[] = [];
-      querySnapshot.forEach((docSnap) => {
-        lista.push({ id: docSnap.id, ...(docSnap.data() as Omit<Produto, 'id'>) });
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        lista.push({
+          id: docSnap.id,
+          nome: data.nome || 'Produto sem nome',
+          quantidade: Number(data.quantidade) || 0,
+          unidade: data.unidade || '',
+          valorCusto: Number(data.valorCusto ?? 0),
+          valorVenda: Number(data.valorVenda ?? 0),
+        });
       });
       setProdutos(lista);
     } catch (error) {
@@ -63,27 +75,49 @@ const Sales = () => {
     }
   };
 
-  const fetchVendas = async () => {
-    try {
-      const q = query(collection(db, 'vendas'), orderBy('data', 'desc'), limit(10));
-      const querySnapshot = await getDocs(q);
-      const lista: Venda[] = [];
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data() as Omit<Venda, 'id'>;
-        const margemLucro = (data.valorVenda - data.valorCusto) * data.quantidade;
-        lista.push({ id: docSnap.id, ...data, margemLucro });
+  // 🔎 Escuta vendas em tempo real
+  const listenVendas = () => {
+    const vendasRef = collection(db, 'vendas');
+    const q = query(vendasRef, orderBy('data', 'desc'), limit(50));
+    return onSnapshot(q, snapshot => {
+      const lista: Venda[] = snapshot.docs.map(docSnap => {
+        const data = docSnap.data();
+
+        const quantidade = Number(data.quantidade ?? 0);
+        const valorVenda = Number(data.valorVenda ?? 0);
+
+        // Pega o produto correspondente do estoque
+        const produtoEstoque = produtos.find(p => p.id === data.produtoId);
+
+        const valorCusto = produtoEstoque ? produtoEstoque.valorCusto : Number(data.valorCusto ?? 0);
+        const margemLucro = (valorVenda - valorCusto) * quantidade;
+
+        return {
+          id: docSnap.id,
+          produtoId: data.produtoId || '',
+          nome: data.nome || 'Produto sem nome',
+          quantidade,
+          unidade: data.unidade || '',
+          data: data.data || Timestamp.now(),
+          valorCusto,
+          valorVenda,
+          margemLucro,
+        };
       });
       setVendas(lista);
-    } catch (error) {
-      console.error('Erro ao buscar vendas:', error);
-    }
+    });
   };
 
   useEffect(() => {
     fetchProdutos();
-    fetchVendas();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = listenVendas();
+    return () => unsubscribe();
+  }, [produtos]); // Dependência garante que o lucro seja calculado corretamente
+
+  // 🛒 Registrar venda manual
   const handleVenda = async (e: React.FormEvent) => {
     e.preventDefault();
     setMensagem(null);
@@ -107,7 +141,9 @@ const Sales = () => {
       const novaQuantidade = produto.quantidade - quantidadeVendida;
       await updateDoc(doc(db, 'produtos', produto.id), { quantidade: novaQuantidade });
 
-      const margemLucro = (produto.valorVenda - produto.valorCusto) * quantidadeVendida;
+      const valorCusto = produto.valorCusto;
+      const valorVenda = produto.valorVenda;
+      const margemLucro = (valorVenda - valorCusto) * quantidadeVendida;
 
       await addDoc(collection(db, 'vendas'), {
         produtoId: produto.id,
@@ -115,8 +151,8 @@ const Sales = () => {
         quantidade: quantidadeVendida,
         unidade: produto.unidade,
         data: Timestamp.now(),
-        valorCusto: produto.valorCusto,
-        valorVenda: produto.valorVenda,
+        valorCusto,
+        valorVenda,
         margemLucro,
       });
 
@@ -124,33 +160,37 @@ const Sales = () => {
       setQuantidadeVendida(0);
       setProdutoSelecionado('');
       fetchProdutos();
-      fetchVendas();
-    } catch {
+    } catch (error) {
+      console.error('Erro ao registrar venda:', error);
       setMensagem({ tipo: 'erro', texto: 'Erro ao registrar venda. Tente novamente.' });
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ❌ Excluir venda
   const handleExcluirVenda = async (venda: Venda) => {
     if (!window.confirm(`Deseja realmente excluir a venda do produto "${venda.nome}"?`)) return;
 
     setSubmitting(true);
     try {
-      const produtoAtual = produtos.find(p => p.id === venda.produtoId);
-      if (produtoAtual) {
-        await updateDoc(doc(db, 'produtos', venda.produtoId), { quantidade: produtoAtual.quantidade + venda.quantidade });
+      const produtoRef = doc(db, 'produtos', venda.produtoId);
+      const produtoSnap = await getDoc(produtoRef);
+
+      if (produtoSnap.exists()) {
+        const produtoData = produtoSnap.data();
+        const quantidadeAtual = Number(produtoData.quantidade ?? 0);
+        await updateDoc(produtoRef, { quantidade: quantidadeAtual + venda.quantidade });
       }
 
       await deleteDoc(doc(db, 'vendas', venda.id));
       setMensagem({ tipo: 'sucesso', texto: 'Venda excluída com sucesso!' });
-      fetchProdutos();
-      fetchVendas();
     } catch (error) {
       console.error('Erro ao excluir venda:', error);
       setMensagem({ tipo: 'erro', texto: 'Erro ao excluir venda. Tente novamente.' });
     } finally {
       setSubmitting(false);
+      fetchProdutos(); // atualizar lista
     }
   };
 
@@ -176,7 +216,7 @@ const Sales = () => {
             required
           >
             <option value="">Selecione um produto</option>
-            {produtos.map((produto) => (
+            {produtos.map(produto => (
               <option key={produto.id} value={produto.id}>
                 {produto.nome} ({produto.quantidade} {produto.unidade})
               </option>
@@ -190,7 +230,7 @@ const Sales = () => {
             type="number"
             placeholder="Digite a quantidade"
             value={quantidadeVendida}
-            onChange={(e) => setQuantidadeVendida(Number(e.target.value))}
+            onChange={e => setQuantidadeVendida(Number(e.target.value))}
             min={1}
             disabled={loading || submitting}
             required
@@ -207,14 +247,14 @@ const Sales = () => {
         <p className="text-center">Nenhuma venda registrada ainda.</p>
       ) : (
         <ul className="sales-list">
-          {vendas.map((venda) => (
+          {vendas.map(venda => (
             <li key={venda.id} className="sales-item">
               <div className="info">
                 <strong>{venda.nome}</strong>
                 <p>Quantidade: <span className="font-semibold">{venda.quantidade} {venda.unidade}</span></p>
-                <p>Custo: R$ {venda.valorCusto?.toFixed(2) ?? '0.00'} / Venda: R$ {venda.valorVenda?.toFixed(2) ?? '0.00'}</p>
-                <p className={`lucro ${venda.margemLucro! >= 0 ? 'lucro-positivo' : 'lucro-negativo'}`}>
-                  Lucro: R$ {(venda.margemLucro ?? 0).toFixed(2)}
+                <p>Custo: R$ {venda.valorCusto.toFixed(2)} / Venda: R$ {venda.valorVenda.toFixed(2)}</p>
+                <p className={`lucro ${venda.margemLucro >= 0 ? 'lucro-positivo' : 'lucro-negativo'}`}>
+                  Lucro: R$ {venda.margemLucro.toFixed(2)}
                 </p>
               </div>
 

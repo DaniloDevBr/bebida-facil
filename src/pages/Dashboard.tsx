@@ -22,6 +22,7 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
+import { useAuthRole } from "../services/AuthRoleContext";
 
 interface Produto {
   id: string;
@@ -59,6 +60,7 @@ export default function Dashboard() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 5;
   const navigate = useNavigate();
+  const { role } = useAuthRole();
 
   // Produtos em tempo real
   useEffect(() => {
@@ -79,28 +81,37 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, []);
 
-  // Vendas em tempo real (últimas 20)
+  // Vendas em tempo real (últimas 50)
   useEffect(() => {
-    const q = query(collection(db, "vendas"), orderBy("data", "desc"), limit(20));
+    const q = query(collection(db, "vendas"), orderBy("data", "desc"), limit(50));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const lista: Venda[] = snapshot.docs.map((docSnap) => {
         const data = docSnap.data();
+
+        const quantidade = Number(data.quantidade ?? 0);
+        const valorVenda = Number(data.valorVenda ?? 0);
+
+        // Pega valorCusto da venda se existir, senão busca no estoque
+        const produtoEstoque = produtos.find((p) => p.id === data.produtoId);
+        const valorCusto =
+          Number(data.valorCusto ?? (produtoEstoque ? produtoEstoque.valorCusto : 0));
+
         return {
           id: docSnap.id,
           produtoId: data.produtoId ?? "",
           nome: data.nome ?? "Produto sem nome",
-          quantidade: Number(data.quantidade ?? 0),
+          quantidade,
           unidade: data.unidade ?? "un",
-          valorCusto: Number(data.valorCusto ?? 0),
-          valorVenda: Number(data.valorVenda ?? 0),
+          valorCusto,
+          valorVenda,
           data: data.data ?? null,
         };
       });
       setVendas(lista);
-      setPaginaAtual(1); // sempre volta para a 1ª página quando recarregar
+      setPaginaAtual(1);
     });
     return () => unsubscribe();
-  }, []);
+  }, [produtos]); // Dependência em produtos garante valorCusto correto
 
   // Notificações em tempo real
   useEffect(() => {
@@ -123,6 +134,7 @@ export default function Dashboard() {
     }
   };
 
+  // Totais
   const totalProdutos = produtos.reduce(
     (acc, p) => acc + (Number(p.quantidade) || 0),
     0
@@ -132,8 +144,7 @@ export default function Dashboard() {
     0
   );
   const totalLucro = vendas.reduce(
-    (acc, v) =>
-      acc + (Number(v.valorVenda) - Number(v.valorCusto)) * Number(v.quantidade),
+    (acc, v) => acc + (Number(v.valorVenda) - Number(v.valorCusto)) * Number(v.quantidade),
     0
   );
 
@@ -153,12 +164,10 @@ export default function Dashboard() {
     }
   };
 
-  // Fechar sidebar ao clicar em link (mobile)
   const handleLinkClick = () => {
     if (sidebarOpen) setSidebarOpen(false);
   };
 
-  // Paginação
   const indexUltimoItem = paginaAtual * itensPorPagina;
   const indexPrimeiroItem = indexUltimoItem - itensPorPagina;
   const vendasPagina = vendas.slice(indexPrimeiroItem, indexUltimoItem);
@@ -166,17 +175,14 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      {/* Botão fixo para abrir sidebar */}
       <button className="menu-btn" onClick={() => setSidebarOpen(true)}>
         <FiMenu />
       </button>
 
-      {/* Overlay para mobile */}
       {sidebarOpen && (
         <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <h2>Meu Dashboard</h2>
@@ -198,7 +204,7 @@ export default function Dashboard() {
           <Link to="/relatorios" onClick={handleLinkClick}>
             <FiBarChart2 /> Relatórios
           </Link>
-          <Link to="/pedidos" onClick={handleLinkClick}>
+          <Link to="/pedidos-admin" onClick={handleLinkClick}>
             <FiBarChart2 /> Pedidos
           </Link>
           <Link
@@ -222,7 +228,6 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* Conteúdo */}
       <main className="content">
         <h1>Visão Geral</h1>
 
@@ -261,6 +266,7 @@ export default function Dashboard() {
                     <th>Produto</th>
                     <th>Qtd</th>
                     <th>Valor Total</th>
+                    <th>Lucro</th>
                     <th>Data</th>
                   </tr>
                 </thead>
@@ -273,9 +279,12 @@ export default function Dashboard() {
                       </td>
                       <td>
                         R${" "}
-                        {(
-                          Number(venda.quantidade) * Number(venda.valorVenda)
-                        ).toFixed(2)}
+                        {(Number(venda.quantidade) * Number(venda.valorVenda)).toFixed(2)}
+                      </td>
+                      <td>
+                        R${" "}
+                        {((Number(venda.valorVenda) - Number(venda.valorCusto)) *
+                          Number(venda.quantidade)).toFixed(2)}
                       </td>
                       <td>{formatData(venda.data)}</td>
                     </tr>
@@ -283,7 +292,6 @@ export default function Dashboard() {
                 </tbody>
               </table>
 
-              {/* Paginação */}
               <div className="paginacao">
                 <button
                   disabled={paginaAtual === 1}

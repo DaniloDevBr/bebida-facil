@@ -38,7 +38,7 @@ interface Pedido {
   telefone: string;
   endereco: string;
   pagamento: string;
-  itens: { nome: string; quantidade: number; valorUnitario: number }[];
+  itens: { nome: string; quantidade: number; valorUnitario: number; valorCusto: number }[];
   total: number;
   status: string;
   criadoEm: any;
@@ -137,6 +137,7 @@ const CatalogoClientes: React.FC = () => {
             nome: i.nome,
             quantidade: i.quantidade,
             valorUnitario: i.valorUnitario ?? i.preco,
+            valorCusto: i.valorCusto ?? 0,
           })) || [],
         };
       });
@@ -216,7 +217,6 @@ const CatalogoClientes: React.FC = () => {
       return;
     }
 
-    // ✅ Validação telefone
     const telLimpo = telefone.replace(/\D/g, "");
     if (telLimpo.length < 10) {
       setMensagem("Informe um telefone válido com DDD.");
@@ -234,6 +234,7 @@ const CatalogoClientes: React.FC = () => {
           nome: item.nome,
           quantidade: item.quantidade,
           valorUnitario: item.valorVenda,
+          valorCusto: item.valorCompra,
         })),
         total: totalCarrinho,
         status: "Pendente",
@@ -277,21 +278,10 @@ const CatalogoClientes: React.FC = () => {
   };
 
   // 🔹 Salvar dados do cliente no localStorage
-  useEffect(() => {
-    localStorage.setItem("clienteNome", clienteNome);
-  }, [clienteNome]);
-
-  useEffect(() => {
-    localStorage.setItem("telefone", telefone);
-  }, [telefone]);
-
-  useEffect(() => {
-    localStorage.setItem("endereco", endereco);
-  }, [endereco]);
-
-  useEffect(() => {
-    localStorage.setItem("pagamento", pagamento);
-  }, [pagamento]);
+  useEffect(() => { localStorage.setItem("clienteNome", clienteNome); }, [clienteNome]);
+  useEffect(() => { localStorage.setItem("telefone", telefone); }, [telefone]);
+  useEffect(() => { localStorage.setItem("endereco", endereco); }, [endereco]);
+  useEffect(() => { localStorage.setItem("pagamento", pagamento); }, [pagamento]);
 
   const produtosFiltrados = categoriaSelecionada === "Todas"
     ? produtos
@@ -425,7 +415,12 @@ const CatalogoClientes: React.FC = () => {
               {pedidosCliente.map(p => (
                 <div key={p.id} className="pedido-card">
                   <div className="pedido-header">
-                    <span><strong>Status:</strong> <span className={`status ${p.status.toLowerCase()}`}>{p.status}</span></span>
+                    <span>
+                      <strong>Status:</strong>{" "}
+                      <span className={`status ${p.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                        {p.status}
+                      </span>
+                    </span>
                     <span><strong>Total:</strong> R$ {p.total.toFixed(2)}</span>
                   </div>
                   <div className="pedido-data">

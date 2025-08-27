@@ -13,7 +13,7 @@ interface Venda {
   unidade: string;
   data?: Timestamp | Date | null; 
   valorVenda?: number | string;
-  valorCompra?: number | string;
+  valorCusto?: number | string;
 }
 
 interface ProdutoVendaResumo {
@@ -77,11 +77,11 @@ const Relatorios = () => {
     vendasLista.forEach(venda => {
       const quantidade = Number(venda.quantidade) || 0;
       const precoVenda = Number(venda.valorVenda) || 0;
-      const precoCompra = Number(venda.valorCompra) || 0;
+      const precoCusto = Number(venda.valorCusto) || 0;
 
       qtdTotal += quantidade;
       receitaTotal += precoVenda * quantidade;
-      lucroTotal += (precoVenda - precoCompra) * quantidade;
+      lucroTotal += (precoVenda - precoCusto) * quantidade;
 
       if (!resumoMap.has(venda.nome)) {
         resumoMap.set(venda.nome, { nome: venda.nome, quantidadeTotal: 0, receitaTotal: 0, lucroTotal: 0 });
@@ -90,7 +90,7 @@ const Relatorios = () => {
       const item = resumoMap.get(venda.nome)!;
       item.quantidadeTotal += quantidade;
       item.receitaTotal += precoVenda * quantidade;
-      item.lucroTotal += (precoVenda - precoCompra) * quantidade;
+      item.lucroTotal += (precoVenda - precoCusto) * quantidade;
     });
 
     setTotalQuantidade(qtdTotal);
@@ -118,7 +118,7 @@ const Relatorios = () => {
       String(v.quantidade ?? 0),
       v.unidade,
       v.valorVenda ? Number(v.valorVenda).toFixed(2) : '0.00',
-      v.valorCompra ? Number(v.valorCompra).toFixed(2) : '0.00',
+      v.valorCusto ? Number(v.valorCusto).toFixed(2) : '0.00',
       formatarData(v.data),
     ]);
     const csvContent =
@@ -199,7 +199,7 @@ const Relatorios = () => {
                 <th>Quantidade</th>
                 <th>Unidade</th>
                 <th>Preço Venda (R$)</th>
-                <th>Preço Compra (R$)</th>
+                <th>Preço Custo (R$)</th>
                 <th>Data</th>
               </tr>
             </thead>
@@ -210,7 +210,7 @@ const Relatorios = () => {
                   <td>{Number(venda.quantidade) || 0}</td>
                   <td>{venda.unidade}</td>
                   <td>{venda.valorVenda ? Number(venda.valorVenda).toFixed(2) : '0.00'}</td>
-                  <td>{venda.valorCompra ? Number(venda.valorCompra).toFixed(2) : '0.00'}</td>
+                  <td>{venda.valorCusto ? Number(venda.valorCusto).toFixed(2) : '0.00'}</td>
                   <td>{formatarData(venda.data)}</td>
                 </tr>
               ))}

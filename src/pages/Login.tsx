@@ -75,7 +75,7 @@ const Login: React.FC = () => {
   return (
     <div className="login-background">
       <div className="login-card">
-        <h1 className="login-title">Bem-vindo à Drink Lab 🍷</h1>
+        <h1 className="login-title">Bem-vindo à Lab Drink 🍷</h1>
         {error && <div className="alert alert-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="login-form">

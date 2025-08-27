@@ -290,6 +290,31 @@
   margin-bottom: 1rem;
 }
 
+/* ===== Status dos pedidos ===== */
+.status {
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.4rem;
+  text-transform: capitalize;
+  color: #fff;
+}
+
+.status.pendente {
+  background: #fbc02d;
+}
+
+.status.em-preparo {
+  background: #1e88e5;
+}
+
+.status.saiu-para-entrega {
+  background: #43a047;
+}
+
+.status.entregue {
+  background: #9c27b0;
+}
+
 /* ===== Responsividade ===== */
 @media (max-width: 1024px) {
   .catalogo-content {

@@ -259,3 +259,49 @@
     font-size: 0.9rem;
   }
 }
+
+/* =====================
+   Aba Meus Pedidos
+===================== */
+.meus-pedidos {
+  margin-top: 2rem;
+}
+
+.meus-pedidos h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #4b1e1e;
+}
+
+.meus-pedidos ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.meus-pedidos li {
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #fff;
+}
+
+.meus-pedidos li ul {
+  margin-top: 0.5rem;
+  padding-left: 1rem;
+}
+
+.meus-pedidos li ul li {
+  margin-bottom: 0.25rem;
+}
+
+.meus-pedidos strong {
+  color: #4b1e1e;
+}
+
+.meus-pedidos small {
+  color: #6b7280;
+}

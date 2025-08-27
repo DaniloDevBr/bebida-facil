@@ -5,23 +5,52 @@
   font-family: 'Inter', sans-serif;
 }
 
-h1 {
-  text-align: center;
-  color: #4f46e5;
+.pedidos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2rem;
-  font-size: 2rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
+h1 {
+  color: #4f46e5;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.btn-dashboard {
+  padding: 0.5rem 1rem;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.btn-dashboard:hover {
+  background-color: #4338ca;
+}
+
+.sem-pedidos {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #6b7280;
+}
+
+.pedidos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
 }
 
 .pedido-card {
   background: #ffffff;
   border-radius: 1rem;
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   transition: transform 0.2s;
 }
@@ -35,7 +64,7 @@ ul {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  flex-wrap: wrap; /* permite quebrar em telas pequenas */
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
@@ -56,8 +85,25 @@ ul {
   background-color: #10b981;
 }
 
+.status.em-preparo {
+  background-color: #f59e0b;
+}
+
+.status.saiu-para-entrega {
+  background-color: #ef4444;
+}
+
 .status.entregue {
   background-color: #6b7280;
+}
+
+.status.cancelado {
+  background-color: #9ca3af;
+}
+
+.produtos-wrapper h3 {
+  margin-bottom: 0.5rem;
+  color: #4b5563;
 }
 
 .produtos-pedido {
@@ -82,32 +128,39 @@ ul {
   flex-wrap: wrap;
 }
 
-.botoes-status button {
+.select-status {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  background-color: #f9fafb;
+  cursor: pointer;
+  font-weight: bold;
+  flex: 1;
+  min-width: 140px;
+}
+
+.btn-excluir {
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   border: none;
+  background-color: #ef4444;
+  color: white;
   cursor: pointer;
   font-weight: bold;
-  color: white;
   transition: background 0.2s;
-  flex: 1; /* ajuda no mobile */
+  flex: 1;
   min-width: 120px;
 }
 
-.botoes-status button:first-child {
-  background-color: #4f46e5;
+.btn-excluir:hover {
+  background-color: #dc2626;
 }
 
-.botoes-status button:first-child:hover {
-  background-color: #4338ca;
-}
-
-.botoes-status button:last-child {
-  background-color: #10b981;
-}
-
-.botoes-status button:last-child:hover {
-  background-color: #059669;
+.pedido-data {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 0.75rem;
+  text-align: right;
 }
 
 /* ======================
@@ -141,7 +194,7 @@ ul {
     flex-direction: column;
   }
 
-  .botoes-status button {
+  .select-status, .btn-excluir, .btn-dashboard {
     width: 100%;
   }
 }

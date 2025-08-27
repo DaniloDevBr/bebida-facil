@@ -8,6 +8,7 @@ import AddProduct from "./pages/AddProduct";
 import Sales from "./pages/Sales";
 import Relatorios from "./pages/Relatorios";
 import Estoque from "./pages/Estoque";
+import PedidosAdmin from "./pages/PedidosAdmin"; // atualizado
 import PedidosCliente from "./pages/PedidosCliente";
 import Notificacoes from "./pages/Notificacoes";
 import CatalogoClientes from "./pages/CatalogoClientes";
@@ -182,6 +183,18 @@ function App() {
                 <RoleProtectedRoute allowedRoles={["admin"]}>
                   <ErrorBoundary>
                     <Notificacoes />
+                  </ErrorBoundary>
+                </RoleProtectedRoute>
+              }
+            />
+
+            {/* 🔹 Rota de pedidos para admin */}
+            <Route
+              path="/pedidos-admin"
+              element={
+                <RoleProtectedRoute allowedRoles={["admin"]}>
+                  <ErrorBoundary>
+                    <PedidosAdmin />
                   </ErrorBoundary>
                 </RoleProtectedRoute>
               }

@@ -5,11 +5,14 @@ import {
   collection,
   getDocs,
   addDoc,
+  updateDoc,
+  doc,
+  getDoc,
   Timestamp,
   query,
   where,
   orderBy,
-  onSnapshot
+  onSnapshot,
 } from 'firebase/firestore';
 import { useAuth } from '../services/AuthContext';
 import '../styles/pedidosCliente.css';
@@ -18,6 +21,7 @@ interface Produto {
   id: string;
   nome: string;
   valorVenda: number;
+  valorCusto: number;
   unidade: string;
   quantidade: number;
   categoria: string;
@@ -32,7 +36,7 @@ interface Pedido {
   id: string;
   clienteNome: string;
   clienteId: string;
-  itens: { nome: string; quantidade: number; valorUnitario: number }[];
+  itens: { nome: string; quantidade: number; valorUnitario: number; valorCusto: number }[];
   total: number;
   status: string;
   criadoEm: any;
@@ -65,6 +69,7 @@ export default function PedidosCliente() {
             id: doc.id,
             nome: data.nome,
             valorVenda: data.valorVenda,
+            valorCusto: data.valorCusto || 0,
             unidade: data.unidade || '',
             quantidade: data.quantidade || 0,
             categoria: data.categoria || 'Sem categoria',
@@ -121,7 +126,8 @@ export default function PedidosCliente() {
           itens: data.itens?.map(i => ({
             nome: i.nome,
             quantidade: i.quantidade,
-            valorUnitario: i.valorUnitario // ⚡ corrigido aqui
+            valorUnitario: i.valorUnitario,
+            valorCusto: i.valorCusto || 0
           })) || []
         };
       });
@@ -172,7 +178,7 @@ export default function PedidosCliente() {
     0
   );
 
-  // 🚀 Enviar pedido
+  // 🚀 Enviar pedido e registrar venda com valorCusto e margemLucro corretos
   const enviarPedido = async () => {
     if (!user || carrinho.length === 0) {
       setMensagem('Adicione produtos ao carrinho antes de enviar.');
@@ -180,18 +186,46 @@ export default function PedidosCliente() {
     }
 
     try {
+      // Registrar pedido
       await addDoc(collection(db, 'pedidos'), {
         clienteId: user.uid,
         clienteNome: user.displayName || 'Cliente',
         itens: carrinho.map(item => ({
           nome: item.nome,
           quantidade: item.quantidadeSelecionada,
-          valorUnitario: item.valorVenda
+          valorUnitario: item.valorVenda,
+          valorCusto: item.valorCusto
         })),
         total: totalCarrinho,
         status: 'Pendente',
         criadoEm: Timestamp.now()
       });
+
+      // Registrar cada item do carrinho na coleção 'vendas' e atualizar estoque
+      for (const item of carrinho) {
+        const produtoRef = doc(db, 'produtos', item.id);
+        const produtoSnap = await getDoc(produtoRef);
+        if (!produtoSnap.exists()) continue;
+
+        const produtoData = produtoSnap.data();
+        const novaQuantidade = (produtoData.quantidade ?? 0) - item.quantidadeSelecionada;
+        await updateDoc(produtoRef, { quantidade: novaQuantidade });
+
+        const valorCusto = produtoData.valorCusto ?? 0;
+        const valorVenda = produtoData.valorVenda ?? 0;
+        const margemLucro = (valorVenda - valorCusto) * item.quantidadeSelecionada;
+
+        await addDoc(collection(db, 'vendas'), {
+          produtoId: item.id,
+          nome: item.nome,
+          quantidade: item.quantidadeSelecionada,
+          unidade: item.unidade,
+          data: Timestamp.now(),
+          valorCusto,
+          valorVenda,
+          margemLucro
+        });
+      }
 
       setMensagem('Pedido enviado com sucesso!');
       setCarrinho([]);
@@ -224,7 +258,6 @@ export default function PedidosCliente() {
 
       {!mostrarPedidos && (
         <>
-          {/* Menu de categorias */}
           <div className="categorias-menu mb-6">
             {categorias.map(cat => (
               <button
@@ -237,7 +270,6 @@ export default function PedidosCliente() {
             ))}
           </div>
 
-          {/* Produtos */}
           <div className="produtos-grid">
             {produtosFiltrados.map(produto => {
               const quantidade = quantidades[produto.id] || 1;
@@ -274,7 +306,6 @@ export default function PedidosCliente() {
             })}
           </div>
 
-          {/* Carrinho lateral */}
           <div className="carrinho-lateral">
             <h2>Carrinho</h2>
             {carrinho.length === 0 ? (
@@ -296,7 +327,6 @@ export default function PedidosCliente() {
         </>
       )}
 
-      {/* Aba Meus Pedidos */}
       {mostrarPedidos && (
         <div className="meus-pedidos">
           <h2>📦 Meus Pedidos</h2>
